@@ -7,5 +7,5 @@ class User(models.Model):
     hero_image = models.ImageField(upload_to='images', null=True,blank=True)
 
     def __str__(self):
-      return 'Header contet'
+      return f'{self.id}'
   
