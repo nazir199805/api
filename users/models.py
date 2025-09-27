@@ -18,3 +18,4 @@ class User(models.Model):
   
 class offer(models.Model):
    timer = models.IntegerField()
+   offer = models.IntegerField(null=True)
