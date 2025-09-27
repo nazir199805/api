@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: api
+    runtime: python
+    buildCommand: ""
+    startCommand: gunicorn Api.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: Api.settings
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: 'False'
