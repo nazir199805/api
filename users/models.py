@@ -1,5 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db import models
+
+
 
 
 
@@ -39,6 +42,8 @@ class HeroButton(models.Model):
     hero_image = models.ForeignKey(HeroImage, related_name='buttons', on_delete=models.CASCADE)
     text = models.CharField(max_length=100)
     link = models.URLField(null=True)
+
+    
 
     def __str__(self):
         return f"Button: {self.text}"
