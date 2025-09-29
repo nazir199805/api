@@ -11,10 +11,12 @@ router.register(r'hero', views.HeroImageViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('user/register', views.CreateUserView.as_view()),
+    
+    # path('user/register', views.CreateUserView.as_view()),
     path('token', TokenObtainPairView.as_view()),
     path('token/refresh', TokenRefreshView.as_view()),
-    path('api-auth', include("rest_framework.urls")),
+    # path('api-auth', include("rest_framework.urls")),
+    path('auth/google/', views.GoogleLogin.as_view(), name='google_login')
 ]
 
 
