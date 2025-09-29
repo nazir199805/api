@@ -9,19 +9,6 @@ class HeroButtonSerializer(serializers.ModelSerializer):
         fields = ['id', 'text', 'link']
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-       user = User.objects.create_user(**validated_data)
-       return user
-
-
-
-
 
 class HeroImageSerializer(serializers.ModelSerializer):
     buttons = HeroButtonSerializer(many=True, read_only=True)  # nested data

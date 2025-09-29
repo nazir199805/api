@@ -1,16 +1,15 @@
-from django.shortcuts import render
-from django.contrib.auth.models import User
-from rest_framework import viewsets, generics
+from rest_framework import viewsets
 from .models import Api, offer, HeroImage
-from .serializers import UserSerializer, OfferSerializer, HeroImageSerializer, ApiSerializer
+from .serializers import  OfferSerializer, HeroImageSerializer, ApiSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
 
 
 
-class CreateUserView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [AllowAny]
+class GoogleLogin(SocialLoginView): # if you want to use Implicit Grant, use this
+    adapter_class = GoogleOAuth2Adapter
 
 
 
