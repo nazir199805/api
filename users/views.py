@@ -8,7 +8,7 @@ from dj_rest_auth.registration.views import SocialLoginView
 
 
 
-class GoogleLogin(SocialLoginView): # if you want to use Implicit Grant, use this
+class GoogleLogin(SocialLoginView): 
     adapter_class = GoogleOAuth2Adapter
 
 

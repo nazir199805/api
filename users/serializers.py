@@ -1,6 +1,20 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Api, offer, HeroImage, HeroButton
+from dj_rest_auth.registration.serializers import RegisterSerializer
+from django.contrib.auth import get_user_model
+
+class CustomRegisterSerializer(RegisterSerializer):
+    first_name = serializers.CharField(max_length=30)
+    last_name = serializers.CharField(max_length=30)
+    
+    def save(self, request):
+        user = super().save(request)
+        user.first_name = self.validated_data.get('first_name')
+        user.last_name = self.validated_data.get('last_name')
+        user.save()
+        return user
+
 
 
 class HeroButtonSerializer(serializers.ModelSerializer):
