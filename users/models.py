@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-
+from taggit.managers import TaggableManager
 
 
 
@@ -47,3 +47,42 @@ class HeroButton(models.Model):
 
     def __str__(self):
         return f"Button: {self.text}"
+
+
+CATAGORY = (
+    ("women", "Women"),
+    ("Men", "Men"),
+    ("kids", "Kids")
+)
+
+
+class Catagory(models.Model):
+    name = models.CharField(max_length=300, choices=CATAGORY)
+
+    def __str__(self):
+        return self.name
+
+
+class Product(models.Model):
+    name = models.CharField(max_length=300)
+    main_image = models.ImageField(upload_to='products')
+    price = models.DecimalField(max_digits=10,decimal_places=2)
+    color = models.CharField(max_length=300, null=True, blank=True)
+    catagory = models.ForeignKey(Catagory, on_delete=models.SET_NULL, null=True)
+    is_favorite = models.BooleanField(default=False, null=True, blank=True) 
+    tags = TaggableManager()
+
+    def __str__(self):
+        return self.name
+
+
+
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sub_images')
+    image = models.ImageField(upload_to='products')
+    
+
+    def __str__(self):
+        return f"Image for {self.product.name}"

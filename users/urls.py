@@ -8,6 +8,7 @@ router = DefaultRouter()
 router.register(r'users', views.ApiViewSet)
 router.register(r'offers', views.OfferViewSet)
 router.register(r'hero', views.HeroImageViewSet)
+router.register(r'products', views.ProductViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -16,7 +17,8 @@ urlpatterns = [
     path('token', TokenObtainPairView.as_view()),
     path('token/refresh', TokenRefreshView.as_view()),
     # path('api-auth', include("rest_framework.urls")),
-    path('auth/google/', views.GoogleLogin.as_view(), name='google_login')
+    path('auth/google/', views.GoogleLogin.as_view(), name='google_login'),
+    
 ]
 
 

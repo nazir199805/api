@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from .models import Api, offer, HeroImage, HeroButton
+from .models import Api, offer, HeroImage, HeroButton, Product, ProductImage, Catagory
 from dj_rest_auth.registration.serializers import RegisterSerializer
-from django.contrib.auth import get_user_model
+from taggit.serializers import (TagListSerializerField, TaggitSerializer)
 
 class CustomRegisterSerializer(RegisterSerializer):
     first_name = serializers.CharField(max_length=30)
@@ -46,3 +45,24 @@ class OfferSerializer(serializers.ModelSerializer):
   class Meta:
     model = offer
     fields = '__all__'
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(use_url=True)
+    class Meta:
+        model = ProductImage
+        fields = ['image']
+
+class CatagorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Catagory
+        fields = ['name']
+
+
+class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+   sub_images = ProductImageSerializer(many=True, read_only=True)
+   catagory = serializers.StringRelatedField()
+   tags = TagListSerializerField()
+
+   class Meta:
+      model = Product
+      fields = ['id', 'name', 'price', 'color', 'tags', 'is_favorite', 'main_image', 'sub_images', 'catagory']

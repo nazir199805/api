@@ -1,9 +1,8 @@
 from rest_framework import viewsets
-from .models import Api, offer, HeroImage
-from .serializers import  OfferSerializer, HeroImageSerializer, ApiSerializer
+from .models import Api, offer, HeroImage, Product
+from .serializers import  OfferSerializer, HeroImageSerializer, ApiSerializer, ProductSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 
 
@@ -29,3 +28,8 @@ class HeroImageViewSet(viewsets.ModelViewSet):
     queryset = HeroImage.objects.filter(is_active=True).order_by('order')
     serializer_class = HeroImageSerializer
     permission_classes = [AllowAny]
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
