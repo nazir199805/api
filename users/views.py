@@ -1,12 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from .models import Api, offer, HeroImage, Product
+from .models import Api, offer, HeroImage, Product, Catagory
 from .serializers import  OfferSerializer, HeroImageSerializer, ApiSerializer, ProductSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from rest_framework import status
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 
 
 class GoogleLogin(SocialLoginView): 
@@ -51,7 +52,8 @@ class FilterProductView(APIView):
 
     
         if catagory:
-            queryset = queryset.filter(catagory=catagory)
+            catagory_obj = get_object_or_404(Catagory, catagory)
+            queryset = queryset.filter(catagory=catagory_obj)
        
 
         serializer = ProductSerializer(queryset, many=True)
