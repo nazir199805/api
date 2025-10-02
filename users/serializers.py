@@ -4,8 +4,11 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from taggit.serializers import (TagListSerializerField, TaggitSerializer)
 
 class CustomRegisterSerializer(RegisterSerializer):
+    username = None
     first_name = serializers.CharField(max_length=30)
     last_name = serializers.CharField(max_length=30)
+    email = serializers.EmailField(required=True)
+    
     
     def save(self, request):
         user = super().save(request)

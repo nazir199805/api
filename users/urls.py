@@ -18,6 +18,7 @@ urlpatterns = [
     path('token/refresh', TokenRefreshView.as_view()),
     # path('api-auth', include("rest_framework.urls")),
     path('auth/google/', views.GoogleLogin.as_view(), name='google_login'),
+    path('auth/products/filter', views.FilterProductView.as_view(), name='filtered_products'),
     
 ]
 
