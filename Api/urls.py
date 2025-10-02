@@ -10,7 +10,7 @@ urlpatterns = [
     path('', include('index.urls')),
     path('api/', include('users.urls')),
     path('accounts/', include('allauth.urls')),
-     path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('auth/', include('dj_rest_auth.urls')),
     # path('auth/registration/', include('dj_rest_auth.registration.urls')),
      path('auth/registration/', RegisterView.as_view(serializer_class=CustomRegisterSerializer)),
