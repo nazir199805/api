@@ -52,7 +52,7 @@ class FilterProductView(APIView):
 
     
         if catagory:
-            catagory_obj = get_object_or_404(Catagory, catagory)
+            catagory_obj = get_object_or_404(Catagory, name=catagory)
             queryset = queryset.filter(catagory=catagory_obj)
        
 
