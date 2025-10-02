@@ -45,13 +45,13 @@ class ProductViewSet(viewsets.ModelViewSet):
 class FilterProductView(APIView):
     
     def post(self, request):
-        category = request.data.get('category')
-       
+        catagory = request.data.get('catagory')
+        print(catagory)
         queryset = Product.objects.all()
 
     
-        if category:
-            queryset = queryset.filter(category=category)
+        if catagory:
+            queryset = queryset.filter(catagory=catagory)
        
 
         serializer = ProductSerializer(queryset, many=True)
