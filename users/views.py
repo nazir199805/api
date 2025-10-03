@@ -16,6 +16,7 @@ class CustomLoginView(LoginView):
         response = super().get_response()
         refresh = RefreshToken.for_user(self.user)
         response.data['refresh'] = str(refresh)
+        response.data['role'] = "admin" if self.user.is_staff or self.user.is_superuser else "user"
         return response
 
 class GoogleLogin(SocialLoginView): 
