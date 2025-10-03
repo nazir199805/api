@@ -51,6 +51,7 @@ REST_USE_JWT = True
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -236,3 +237,26 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*', 'first_name', 'la
 # ACCOUNT_EMAIL_REQUIRED = True
 # ACCOUNT_UNIQUE_EMAIL = True
 # ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+
+JAZZMIN_SETTINGS = {
+    "site_title": "My Admin",
+    "site_header": "My Admin Panel",
+    "site_brand": "About You",
+    "welcome_sign": "Welcome to My Admin",
+    "site_logo": None,  # You can set a logo here if you want
+    "copyright": "About You ©",
+    
+    # === Enable dark mode ===
+    "theme": "cyborg",  # One of the Bootswatch themes
+
+    # === Customize icons ===
+    "icons": {
+        "auth.User": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        # Add your models here with desired orange-colored icons
+        # Use FontAwesome classes
+    },
+
+   
+  
+}
