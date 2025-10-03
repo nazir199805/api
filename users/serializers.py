@@ -2,6 +2,22 @@ from rest_framework import serializers
 from .models import Api, offer, HeroImage, HeroButton, Product, ProductImage, Catagory
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from taggit.serializers import (TagListSerializerField, TaggitSerializer)
+from dj_rest_auth.serializers import LoginSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
+class CustomLoginSerializer(LoginSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        
+        refresh = RefreshToken.for_user(self.user)
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+
+        return data
+
+
 
 class CustomRegisterSerializer(RegisterSerializer):
     username = None

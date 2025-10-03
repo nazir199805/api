@@ -33,6 +33,9 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 
@@ -41,6 +44,9 @@ REST_AUTH = {
     "USE_JWT": True, 
     "TOKEN_MODEL": None,
 }
+
+REST_USE_JWT = True
+
 
 # Application definition
 
@@ -56,6 +62,7 @@ INSTALLED_APPS = [
     # 'rest_framework.authtoken',
     'corsheaders',
     'dj_rest_auth',
+    'rest_framework_simplejwt.token_blacklist',
     'allauth',
     'allauth.account',
     'dj_rest_auth.registration',
@@ -114,9 +121,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'users.serializers.CustomRegisterSerializer',
 }
 
-REST_AUTH_SERIALIZERS = {
-    'LOGIN_SERIALIZER': 'dj_rest_auth.serializers.JWTSerializer',
-}
+
 
 
 CSRF_TRUSTED_ORIGINS = [
