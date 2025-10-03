@@ -1,0 +1,99 @@
+/* === DARK BACKGROUND AND LIGHT TEXT === */
+body, html {
+    background-color: #121212 !important;
+    color: #f0f0f0 !important;
+}
+
+/* === ORANGE NAVBAR === */
+.navbar, .navbar.navbar-expand {
+    background-color: #ff6600 !important;  /* Bright orange */
+    border-bottom: 1px solid #e65c00;
+}
+
+.navbar .nav-link,
+.navbar .navbar-brand,
+.navbar .dropdown-toggle {
+    color: #ffffff !important;
+}
+
+.navbar .nav-link:hover {
+    background-color: #e65c00 !important;
+}
+
+/* === DARK SIDEBAR === */
+.sidebar {
+    background-color: #1e1e1e !important;
+    color: #f0f0f0 !important;
+}
+
+.sidebar a {
+    color: #f0f0f0 !important;
+}
+
+.sidebar a:hover {
+    background-color: #333 !important;
+    color: #ffa500 !important; /* hover orange */
+}
+
+/* === ORANGE BUTTONS === */
+.btn, .button, input[type="submit"], .submit-row input {
+    background-color: #ff6600 !important;
+    border-color: #ff6600 !important;
+    color: #ffffff !important;
+}
+
+.btn:hover, .button:hover, input[type="submit"]:hover, .submit-row input:hover {
+    background-color: #e65c00 !important;
+    border-color: #e65c00 !important;
+}
+
+/* === INPUTS, SELECTS, ETC === */
+input, select, textarea {
+    background-color: #2c2c2c !important;
+    color: #f0f0f0 !important;
+    border-color: #444 !important;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #ff6600 !important;
+    box-shadow: 0 0 5px #ff6600 !important;
+}
+
+/* === TABLES === */
+table {
+    background-color: #1e1e1e !important;
+    color: #f0f0f0 !important;
+}
+
+table thead {
+    background-color: #2a2a2a !important;
+}
+
+table tbody tr:hover {
+    background-color: #333 !important;
+}
+
+/* === LINKS === */
+a, a:link, a:visited {
+    color: #ffa500 !important;
+}
+
+a:hover {
+    color: #ffffff !important;
+}
+
+/* === MESSAGES (e.g., success/warning) === */
+.alert-success {
+    background-color: #155724 !important;
+    color: #d4edda !important;
+}
+
+.alert-warning {
+    background-color: #856404 !important;
+    color: #fff3cd !important;
+}
+
+.alert-danger {
+    background-color: #721c24 !important;
+    color: #f8d7da !important;
+}
