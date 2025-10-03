@@ -36,8 +36,10 @@ SIMPLE_JWT = {
 }
 
 
-DJREST_AUTH = {
+REST_USE_JWT = True
+REST_AUTH = {
     "USE_JWT": True, 
+    "TOKEN_MODEL": None,
 }
 
 # Application definition
@@ -51,7 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'rest_framework',
-    'rest_framework.authtoken',
+    # 'rest_framework.authtoken',
     'corsheaders',
     'dj_rest_auth',
     'allauth',
@@ -112,7 +114,16 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'users.serializers.CustomRegisterSerializer',
 }
 
+REST_AUTH_SERIALIZERS = {
+    'LOGIN_SERIALIZER': 'dj_rest_auth.serializers.JWTSerializer',
+}
 
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+]
+
+CSRF_COOKIE_HTTPONLY = False  
 
 
 
@@ -133,11 +144,11 @@ INTERNAL_IPS = [
 
 
 
-ACCOUNT_LOGIN_METHOD = 'email'
+ACCOUNT_LOGIN_METHODS = ["email"]
 
 
 
-REST_USE_JWT = True  
+
 
 
 # Database
@@ -215,8 +226,8 @@ SOCIALACCOUNT_STORE_TOKENS = True
 
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*', 'first_name', 'last_name'] 
 
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_UNIQUE_EMAIL = True
+# ACCOUNT_USER_MODEL_USERNAME_FIELD = None
