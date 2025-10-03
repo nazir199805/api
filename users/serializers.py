@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class CustomLoginSerializer(LoginSerializer):
+    username = None
     def validate(self, attrs):
         data = super().validate(attrs)
 

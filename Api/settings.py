@@ -110,7 +110,7 @@ WSGI_APPLICATION = 'Api.wsgi.application'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_ALL_CREDENTIALS = True
-
+CORS_ALLOWED_ORIGINS = ["*"]
 
 AUTHENTICATION_BACKENDS = [
    
@@ -215,6 +215,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 
 # MEDIA_URL  = '/media/'
 
@@ -246,8 +249,7 @@ JAZZMIN_SETTINGS = {
     "site_logo": None,  # You can set a logo here if you want
     "copyright": "About You ©",
     
-    # === Enable dark mode ===
-    "theme": "cyborg",  # One of the Bootswatch themes
+    
 
     # === Customize icons ===
     "icons": {
@@ -259,4 +261,12 @@ JAZZMIN_SETTINGS = {
 
    
   
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "sidebar_nav_bg": "#1e1e1e",         # Dark sidebar background
+    "sidebar_nav_active_bg": "#ff6600",  # Orange active item background
+    "sidebar_nav_active_color": "#fff", # Active text color
+    "sidebar_nav_color": "#ccc",         # Sidebar text color
+    "sidebar_nav_hover_color": "#ff6600", # Hover text color (orange)
 }
