@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+from django.utils.translation import gettext_lazy as _
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -51,7 +52,7 @@ REST_USE_JWT = True
 # Application definition
 
 INSTALLED_APPS = [
-    'jazzmin',
+    'unfold',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -87,6 +88,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'Api.urls'
@@ -110,7 +112,7 @@ WSGI_APPLICATION = 'Api.wsgi.application'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_ALL_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = ["*"]
+# CORS_ALLOWED_ORIGINS = True
 
 AUTHENTICATION_BACKENDS = [
    
@@ -135,21 +137,11 @@ CSRF_COOKIE_HTTPONLY = False
 
 SITE_ID = 1
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'apikey'  # literally this string
-EMAIL_HOST_PASSWORD = os.getenv("SENDGRID_API_KEY")
+EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
 
-DEFAULT_FROM_EMAIL = 'nazirsherzad12345@gmail.com'  
-
-
-INTERNAL_IPS = [
-    "127.0.0.1",  # Localhost
-]
-
-
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")  
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+DEFAULT_FROM_EMAIL = "nazirsherzad12345@gmail.com" 
 
 
 ACCOUNT_LOGIN_METHODS = ["email"]
@@ -243,32 +235,114 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*', 'first_name', 'la
 # ACCOUNT_UNIQUE_EMAIL = True
 # ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
-JAZZMIN_SETTINGS = {
-    "site_title": "My Admin",
-    "site_header": "My Admin Panel",
-    "site_brand": "About You",
-    "welcome_sign": "Welcome to My Admin",
-    "site_logo": None,  # You can set a logo here if you want
-    "copyright": "About You ©",
+
+LANGUAGES = (
+    ("de", ("German")),
+    ("en", ("English")),
+)
+
+
+# UNFOLD = {
+#      "SITE_TITLE": "Site Admin Panel",
+#     "SITE_HEADER": "About You",
+#     "SHOW_LANGUAGES": True,
     
+   
+#     "THEME": {
+#         "PRIMARY_COLOR": "blue",  # change this to your preferred color
+#          "DARK_MODE": True,
+#     }
+# }
+
+
+from django.urls import reverse_lazy
+
+
+UNFOLD = {
+    "SHOW_LANGUAGES": True,
+    "SITE_TITLE": "About You",
+    "SITE_HEADER": "About You Admin",
+    "SITE_SUBHEADER": "Welcome to your site admin",
+    "SITE_DROPDOWN": [
+        {
+            "icon": "diamond",
+            "title": _("My site"),
+            "link": "/",
+        },
+    ],
     
 
-    # === Customize icons ===
-    "icons": {
-        "auth.User": "fas fa-user",
-        "auth.Group": "fas fa-users",
-        # Add your models here with desired orange-colored icons
-        # Use FontAwesome classes
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "SHOW_BACK_BUTTON": False,
+
+    
+    "BORDER_RADIUS": "6px",
+
+"COLORS": {
+    "primary": {
+        "50": "#fffbeb",
+        "100": "#fef3c7",
+        "200": "#fde68a",
+        "300": "#fcd34d",
+        "400": "#fbbf24",
+        "500": "#f59e0b",  # main amber
+        "600": "#d97706",
+        "700": "#b45309",
+        "800": "#92400e",
+        "900": "#78350f",
+        "950": "#451a03",
     },
+    "font": {
+        "subtle-light": "var(--color-base-500)",
+        "subtle-dark": "var(--color-base-400)",
+        "default-light": "var(--color-base-600)",
+        "default-dark": "var(--color-base-300)",
+        "important-light": "var(--color-base-900)",
+        "important-dark": "var(--color-base-100)",
+    },
+},
+
+
+
+ "SIDEBAR": {
+    "show_search": False,
+    "navigation": [
+        {
+            "title": _("Navigation"),
+            "separator": True,
+            "items": [
+                {
+                    "title": _("Dashboard"),
+                    "icon": "dashboard",
+                    "link": reverse_lazy("admin:index"),
+                },
+                {
+                     "title": _("Users"),
+                    "icon": "people",
+                    "link": reverse_lazy("admin:auth_user_changelist"),
+                },
+                {
+                    "title": _("Products"),
+                    "icon": "shopping_bag",
+                    "link": reverse_lazy("admin:users_product_changelist"),
+                },
+                {
+                    "title": _("Hero Images"),
+                    "icon": "image",
+                    "link": reverse_lazy("admin:users_heroimage_changelist"),
+                },
+                {
+                    "title": _("Categories"),
+                    "icon": "category",
+                    "link": reverse_lazy("admin:users_catagory_changelist"),
+                },
+                 
+            ],
+        },
+    ],
+}
 
    
-  
 }
 
-JAZZMIN_UI_TWEAKS = {
-    "sidebar_nav_bg": "#1e1e1e",         # Dark sidebar background
-    "sidebar_nav_active_bg": "#ff6600",  # Orange active item background
-    "sidebar_nav_active_color": "#fff", # Active text color
-    "sidebar_nav_color": "#ccc",         # Sidebar text color
-    "sidebar_nav_hover_color": "#ff6600", # Hover text color (orange)
-}

@@ -1,10 +1,11 @@
 from django.contrib import admin
 from .models import Api, offer, HeroImage, HeroButton, Product, ProductImage, Catagory
+from unfold.admin import ModelAdmin
 
 class ProductImagesTab(admin.TabularInline):
     model = ProductImage
 
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(ModelAdmin):
     list_display = ['name', 'price']
     inlines = [ProductImagesTab]
 
