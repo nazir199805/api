@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Api, offer, HeroImage, HeroButton, Product, ProductImage, Catagory
+from .models import Api, offer, HeroImage, HeroButton, Product, ProductImage, Catagory, Profile
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from taggit.serializers import (TagListSerializerField, TaggitSerializer)
 from dj_rest_auth.serializers import LoginSerializer
@@ -20,19 +20,49 @@ class CustomLoginSerializer(LoginSerializer):
 
 
 
+# users/serializers.py
+
+
 class CustomRegisterSerializer(RegisterSerializer):
-    username = None
+    username = None  
     first_name = serializers.CharField(max_length=30)
     last_name = serializers.CharField(max_length=30)
     email = serializers.EmailField(required=True)
+
+    # Profile fields
     
+    gender = serializers.CharField(required=False, default='male')
     
+
     def save(self, request):
         user = super().save(request)
-        user.first_name = self.validated_data.get('first_name')
-        user.last_name = self.validated_data.get('last_name')
+        user.first_name = self.validated_data.get('first_name', '')
+        user.last_name = self.validated_data.get('last_name', '')
         user.save()
+
+        # Save profile fields
+        profile = user.profile
+        profile.gender = self.validated_data.get('gender', 'male')
+        profile.save()
+
         return user
+
+
+
+
+# class CustomRegisterSerializer(RegisterSerializer):
+#     username = None
+#     first_name = serializers.CharField(max_length=30)
+#     last_name = serializers.CharField(max_length=30)
+#     email = serializers.EmailField(required=True)
+    
+    
+#     def save(self, request):
+#         user = super().save(request)
+#         user.first_name = self.validated_data.get('first_name')
+#         user.last_name = self.validated_data.get('last_name')
+#         user.save()
+#         return user
 
 
 

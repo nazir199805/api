@@ -137,12 +137,8 @@ CSRF_COOKIE_HTTPONLY = False
 
 SITE_ID = 1
 
-EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")  
-SENDGRID_SANDBOX_MODE_IN_DEBUG = False
-DEFAULT_FROM_EMAIL = "nazirsherzad12345@gmail.com" 
-
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "nazirsherzad12345@gmail.com"  
 
 ACCOUNT_LOGIN_METHODS = ["email"]
 
@@ -336,6 +332,11 @@ UNFOLD = {
                     "title": _("Categories"),
                     "icon": "category",
                     "link": reverse_lazy("admin:users_catagory_changelist"),
+                },
+                 {
+                    "title": _("Profiles"),
+                    "icon": "person",
+                    "link": reverse_lazy("admin:users_profile_changelist"),
                 },
                  
             ],

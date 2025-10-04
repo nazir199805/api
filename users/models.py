@@ -2,6 +2,21 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from taggit.managers import TaggableManager
+from django.contrib.auth.models import User
+
+class Profile(models.Model):
+    GENDER_CHOICES = (
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('other', 'Other'),
+    )
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='male')
+
+
+    def __str__(self):
+        return self.gender
 
 
 
