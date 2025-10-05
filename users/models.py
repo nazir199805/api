@@ -4,6 +4,9 @@ from django.db import models
 from taggit.managers import TaggableManager
 from django.contrib.auth.models import User
 
+
+
+
 class Profile(models.Model):
     GENDER_CHOICES = (
         ('male', 'Male'),
@@ -80,7 +83,6 @@ class Catagory(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=300)
-    main_image = models.ImageField(upload_to='products')
     price = models.DecimalField(max_digits=10,decimal_places=2)
     color = models.CharField(max_length=300, null=True, blank=True)
     catagory = models.ForeignKey(Catagory, on_delete=models.SET_NULL, null=True)

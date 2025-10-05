@@ -1,13 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from .models import Api, offer, HeroImage, Product, Catagory
+from .models import Api, offer, HeroImage,  Catagory,  Product
 from .serializers import  OfferSerializer, HeroImageSerializer, ApiSerializer, ProductSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView, LoginView
 from rest_framework import status
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
@@ -19,8 +19,6 @@ class CustomLoginView(LoginView):
         response.data['role'] = "admin" if self.user.is_staff or self.user.is_superuser else "user"
         return response
 
-class GoogleLogin(SocialLoginView): 
-    adapter_class = GoogleOAuth2Adapter
 
 
 

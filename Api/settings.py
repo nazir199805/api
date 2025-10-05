@@ -74,6 +74,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.apple',
     'taggit',
+    "image_uploader_widget",
+    
 ]
 
 MIDDLEWARE = [
@@ -96,7 +98,7 @@ ROOT_URLCONF = 'Api.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -124,7 +126,14 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'users.serializers.CustomRegisterSerializer',
 }
 
-
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'AUTH_PARAMS': {
+            'prompt': 'select_account',  # forces account chooser popup
+            'access_type': 'online',
+        }
+    }
+}
 
 
 CSRF_TRUSTED_ORIGINS = [
@@ -238,17 +247,17 @@ LANGUAGES = (
 )
 
 
-# UNFOLD = {
-#      "SITE_TITLE": "Site Admin Panel",
-#     "SITE_HEADER": "About You",
-#     "SHOW_LANGUAGES": True,
+UNFOLD = {
+     "SITE_TITLE": "Site Admin Panel",
+    "SITE_HEADER": "About You",
+    "SHOW_LANGUAGES": True,
     
    
-#     "THEME": {
-#         "PRIMARY_COLOR": "blue",  # change this to your preferred color
-#          "DARK_MODE": True,
-#     }
-# }
+    "THEME": {
+        "PRIMARY_COLOR": "blue",  # change this to your preferred color
+         "DARK_MODE": True,
+    }
+}
 
 
 from django.urls import reverse_lazy

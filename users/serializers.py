@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Api, offer, HeroImage, HeroButton, Product, ProductImage, Catagory, Profile
+from .models import Api, offer, HeroImage, HeroButton, Catagory, Profile, Product, ProductImage
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from taggit.serializers import (TagListSerializerField, TaggitSerializer)
 from dj_rest_auth.serializers import LoginSerializer
@@ -20,7 +20,6 @@ class CustomLoginSerializer(LoginSerializer):
 
 
 
-# users/serializers.py
 
 
 class CustomRegisterSerializer(RegisterSerializer):
@@ -50,19 +49,7 @@ class CustomRegisterSerializer(RegisterSerializer):
 
 
 
-# class CustomRegisterSerializer(RegisterSerializer):
-#     username = None
-#     first_name = serializers.CharField(max_length=30)
-#     last_name = serializers.CharField(max_length=30)
-#     email = serializers.EmailField(required=True)
-    
-    
-#     def save(self, request):
-#         user = super().save(request)
-#         user.first_name = self.validated_data.get('first_name')
-#         user.last_name = self.validated_data.get('last_name')
-#         user.save()
-#         return user
+
 
 
 
@@ -115,4 +102,4 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
    class Meta:
       model = Product
-      fields = ['id', 'name', 'price', 'color', 'tags', 'is_favorite', 'main_image', 'sub_images', 'catagory']
+      fields = ['id', 'name', 'price', 'color', 'tags', 'is_favorite', 'sub_images', 'catagory']

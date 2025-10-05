@@ -12,13 +12,11 @@ router.register(r'products', views.ProductViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    
-    # path('user/register', views.CreateUserView.as_view()),
     path('token', TokenObtainPairView.as_view()),
     path('token/refresh', TokenRefreshView.as_view()),
-    # path('api-auth', include("rest_framework.urls")),
-    path('auth/google/', views.GoogleLogin.as_view(), name='google_login'),
-    path('products/filter', views.FilterProductView.as_view(), name='filtered_products'),
+   
+   
+    # path('products/filter', views.FilterProductView.as_view(), name='filtered_products'),
     
 ]
 

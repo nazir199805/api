@@ -6,6 +6,9 @@ from dj_rest_auth.registration.views import RegisterView
 from users.serializers import CustomRegisterSerializer
 from users.views import CustomLoginView
 from django.conf.urls.i18n import i18n_patterns
+from django.conf.urls.static import static
+
+
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
@@ -18,7 +21,6 @@ urlpatterns = [
     path('auth/registration/', RegisterView.as_view(serializer_class=CustomRegisterSerializer)),
     path("i18n/", include("django.conf.urls.i18n")),
    
-
     ]
 
 urlpatterns += i18n_patterns(
