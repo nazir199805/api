@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Api, offer, HeroImage, HeroButton, Catagory, Profile, Product, ProductImage
+from .models import Api, offer, HeroImage, HeroButton, Catagory, Profile, Product, ProductImage, Notification
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from taggit.serializers import (TagListSerializerField, TaggitSerializer)
 from dj_rest_auth.serializers import LoginSerializer
@@ -95,11 +95,75 @@ class CatagorySerializer(serializers.ModelSerializer):
         fields = ['name']
 
 
-class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
-   sub_images = ProductImageSerializer(many=True, read_only=True)
-   catagory = serializers.StringRelatedField()
-   tags = TagListSerializerField()
+# class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+#    sub_images = ProductImageSerializer(many=True, read_only=True)
+#    catagory = serializers.StringRelatedField()
+#    tags = TagListSerializerField()
 
-   class Meta:
-      model = Product
-      fields = ['id', 'name', 'price', 'color', 'tags', 'is_favorite', 'sub_images', 'catagory']
+#    class Meta:
+#       model = Product
+#       fields = ['id', 'name', 'price', 'color', 'tags', 'is_favorite', 'sub_images', 'catagory']
+
+ 
+
+from .models import Product, Favorite, Cart, CartItem
+
+class ProductSerializer(serializers.ModelSerializer):
+    is_favorited = serializers.SerializerMethodField()
+    sub_images = ProductImageSerializer(many=True, read_only=True)
+    catagory = serializers.StringRelatedField()
+    tags = TagListSerializerField()
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'price', 'color', 'catagory', 'is_favorite', 'tags', 'is_favorited','sub_images',]
+
+    def get_is_favorited(self, obj):
+        user = self.context.get('user')  
+        if user and Favorite.objects.filter(user=user, product=obj).exists():
+            return True
+        return False
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name')
+
+    class Meta:
+        model = Favorite
+        fields = ['id', 'user', 'product', 'product_name', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name')
+    product_price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2)
+
+    class Meta:
+        model = CartItem
+        fields = ['id', 'cart', 'product', 'product_name', 'product_price', 'quantity']
+
+
+class CartSerializer(serializers.ModelSerializer):
+    user_username = serializers.CharField(source='user.username')
+    cart_items = CartItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Cart
+        fields = ['id', 'user', 'user_username', 'is_active',  'cart_items']
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    user_username = serializers.CharField(source='user.username', read_only=True)  # To show the username of the user who received the notification
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)  # Format the datetime
+    is_read = serializers.BooleanField()  # Include is_read field to show if the notification is read
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'user', 'user_username', 'message', 'created_at', 'is_read']
+        read_only_fields = ['user', 'created_at']  # Prevent changes to 'user' and 'created_at' from external requests
+    
+    def update(self, instance, validated_data):
+        """Override the update method to handle the 'mark_as_read' logic."""
+        instance.is_read = validated_data.get('is_read', instance.is_read)
+        instance.save()
+        return instance

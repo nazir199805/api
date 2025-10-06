@@ -9,14 +9,15 @@ router.register(r'users', views.ApiViewSet)
 router.register(r'offers', views.OfferViewSet)
 router.register(r'hero', views.HeroImageViewSet)
 router.register(r'products', views.ProductViewSet)
+router.register(r'favorites', views.FavoriteViewSet)
+router.register(r'carts', views.CartViewSet)
+router.register(r'notifications', views.NotificationViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
     path('token', TokenObtainPairView.as_view()),
     path('token/refresh', TokenRefreshView.as_view()),
-   
-   
-    # path('products/filter', views.FilterProductView.as_view(), name='filtered_products'),
+    path('products/filter', views.FilterProductView.as_view(), name='filtered_products'),
     
 ]
 

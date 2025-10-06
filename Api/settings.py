@@ -248,15 +248,21 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*', 'first_name', 'la
 # ACCOUNT_UNIQUE_EMAIL = True
 # ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
+# ACCOUNT_SIGNUP_FIELDS = {
+#     'username': {
+#         'required': False,  # Change this based on your preference
+#     },
+#     'email': {
+#         'required': True,  # This means the email is required during signup
+#     }
+# }
+
 
 LANGUAGES = (
     ("de", ("German")),
     ("en", ("English")),
 )
 
-
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv('GOOGLE_CLIENT_ID')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
 from django.urls import reverse_lazy
 
