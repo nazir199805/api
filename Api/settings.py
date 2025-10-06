@@ -313,49 +313,113 @@ UNFOLD = {
 },
 
 
-
- "SIDEBAR": {
-    "show_search": False,
-    "navigation": [
-        {
-            "title": _("Navigation"),
-            "separator": True,
-            "items": [
-                {
-                    "title": _("Dashboard"),
-                    "icon": "dashboard",
-                    "link": reverse_lazy("admin:index"),
-                },
-                {
-                     "title": _("Users"),
-                    "icon": "people",
-                    "link": reverse_lazy("admin:auth_user_changelist"),
-                },
-                {
-                    "title": _("Products"),
-                    "icon": "shopping_bag",
-                    "link": reverse_lazy("admin:users_product_changelist"),
-                },
-                {
-                    "title": _("Hero Images"),
-                    "icon": "image",
-                    "link": reverse_lazy("admin:users_heroimage_changelist"),
-                },
-                {
-                    "title": _("Categories"),
-                    "icon": "category",
-                    "link": reverse_lazy("admin:users_catagory_changelist"),
-                },
-                 {
-                    "title": _("Profiles"),
-                    "icon": "person",
-                    "link": reverse_lazy("admin:users_profile_changelist"),
-                },
-                 
-            ],
-        },
-    ],
+    "SIDEBAR": {
+        "show_search": False,
+        "navigation": [
+            {
+                "title": _("Navigation"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Dashboard"),
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                ],
+            },
+            {
+                "title": _("User Management"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Users"),
+                        "icon": "people",
+                        "link": reverse_lazy("admin:auth_user_changelist"),
+                    },
+                    {
+                        "title": _("Profiles"),
+                        "icon": "person",
+                        "link": reverse_lazy("admin:users_profile_changelist"),
+                    },
+                    {
+                        "title": _("Notifications"),
+                        "icon": "notifications",
+                        "link": reverse_lazy("admin:users_notification_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Store"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Products"),
+                        "icon": "shopping_bag",
+                        "link": reverse_lazy("admin:users_product_changelist"),
+                    },
+                    {
+                        "title": _("Categories"),
+                        "icon": "category",
+                        "link": reverse_lazy("admin:users_catagory_changelist"),
+                    },
+                    {
+                        "title": _("Tags"),
+                        "icon": "sell",
+                        "link": reverse_lazy("admin:taggit_tag_changelist"),
+                    },
+                    {
+                        "title": _("Favorites"),
+                        "icon": "favorite",
+                        "link": reverse_lazy("admin:users_favorite_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Cart"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Carts"),
+                        "icon": "shopping_cart",
+                        "link": reverse_lazy("admin:users_cart_changelist"),
+                    },
+                    {
+                        "title": _("Cart Items"),
+                        "icon": "inventory_2",
+                        "link": reverse_lazy("admin:users_cartitem_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Frontend CMS"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Hero Images"),
+                        "icon": "image",
+                        "link": reverse_lazy("admin:users_heroimage_changelist"),
+                    },
+                    {
+                        "title": _("Hero Buttons"),
+                        "icon": "radio_button_checked",
+                        "link": reverse_lazy("admin:users_herobutton_changelist"),
+                    },
+                    {
+                        "title": _("API Content"),
+                        "icon": "code",
+                        "link": reverse_lazy("admin:users_api_changelist"),
+                    },
+                    {
+                        "title": _("Offers"),
+                        "icon": "local_offer",
+                        "link": reverse_lazy("admin:users_offer_changelist"),
+                    },
+                ],
+            },
+        ],
+    
 }
+
 
    
 }

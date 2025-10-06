@@ -23,7 +23,6 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10,decimal_places=2)
     color = models.CharField(max_length=300, null=True, blank=True)
     catagory = models.ForeignKey(Catagory, on_delete=models.SET_NULL, null=True)
-    is_favorite = models.BooleanField(default=False, null=True, blank=True) 
     tags = TaggableManager()
 
     def __str__(self):
@@ -61,7 +60,7 @@ class Favorite(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  
 
     class Meta:
-        unique_together = ('user', 'product')  # Ensure a user can't favorite the same product twice
+        unique_together = ('user', 'product')  
 
     def __str__(self):
         return f"{self.product.name} marked as favorite by {self.user.username}"

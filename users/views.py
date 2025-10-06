@@ -23,34 +23,12 @@ class GoogleLogin(SocialLoginView):
 
 
 class CustomLoginView(LoginView):
-    # def get_response(self):
-    #     response = super().get_response()
-    #     refresh = RefreshToken.for_user(self.user)
-    #     response.data['refresh'] = str(refresh)
-    #     response.data['role'] = "admin" if self.user.is_staff or self.user.is_superuser else "user"
-
-    #     return 
-     def get_response(self):
-        # Get the response from the parent class (standard login flow)
+    def get_response(self):
         response = super().get_response()
-
-        # Authentication happens here:
-        # self.user is set if the login is successful, as it's managed by LoginView
-        user = self.user
-
-        # If user is authenticated, generate a JWT refresh token and include role in response
-        if user is not None:
-            # Generate a refresh token using the authenticated user
-            refresh = RefreshToken.for_user(user)
-            response.data['refresh'] = str(refresh)
-            
-            # Determine the user's role based on permissions (e.g., staff or superuser)
-            response.data['role'] = "admin" if user.is_staff or user.is_superuser else "user"
-        else:
-            # Handle the case where the authentication fails (user not found or incorrect credentials)
-            response.data['error'] = 'Invalid credentials'
-            response.status_code = 401  # Unauthorized status code
-
+        refresh = RefreshToken.for_user(self.user)
+        response.data['refresh'] = str(refresh)
+        response.data['role'] = "admin" if self.user.is_staff or self.user.is_superuser else "user"
+        
         return response
 
 
@@ -63,6 +41,8 @@ class FavoriteViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)  
+
+
 
 class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()

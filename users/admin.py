@@ -12,9 +12,9 @@ class ProductImagesTab(ImageUploaderInline):
 
 
 class ProductAdmin(ModelAdmin):
-    list_display = ('name', 'price', 'catagory', 'is_favorite') 
+    list_display = ('name', 'price', 'catagory',) 
     search_fields = ('name', 'catagory__name')  # Fields to search
-    list_filter = ('catagory', 'is_favorite')  # Add filters in the admin panel
+    list_filter = ('catagory',)  # Add filters in the admin panel
     inlines = [ProductImagesTab]
 
 
@@ -47,7 +47,7 @@ class CartItemAdmin(ModelAdmin):
 admin.site.register(CartItem, CartItemAdmin)
 
 
-class NotificationAdmin(admin.ModelAdmin):
+class NotificationAdmin(ModelAdmin):
     list_display = ('user', 'message', 'is_read', 'created_at')
     list_filter = ('is_read',)
     search_fields = ('message',)

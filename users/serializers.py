@@ -116,7 +116,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'price', 'color', 'catagory', 'is_favorite', 'tags', 'is_favorited','sub_images',]
+        fields = ['id', 'name', 'price', 'color', 'catagory', 'tags', 'is_favorited','sub_images',]
 
     def get_is_favorited(self, obj):
         user = self.context.get('user')  
@@ -140,16 +140,16 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ['id', 'cart', 'product', 'product_name', 'product_price', 'quantity']
+        fields = ['id', 'cart', 'product', 'product_name', 'product_price', 'quantity', 'total_price']
 
 
 class CartSerializer(serializers.ModelSerializer):
     user_username = serializers.CharField(source='user.username')
-    cart_items = CartItemSerializer(many=True, read_only=True)
+    items = CartItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Cart
-        fields = ['id', 'user', 'user_username', 'is_active',  'cart_items']
+        fields = ['id', 'user', 'user_username', 'is_active', 'items']
 
 
 class NotificationSerializer(serializers.ModelSerializer):
