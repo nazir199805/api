@@ -255,18 +255,8 @@ LANGUAGES = (
 )
 
 
-UNFOLD = {
-     "SITE_TITLE": "Site Admin Panel",
-    "SITE_HEADER": "About You",
-    "SHOW_LANGUAGES": True,
-    
-   
-    "THEME": {
-        "PRIMARY_COLOR": "blue",  # change this to your preferred color
-         "DARK_MODE": True,
-    }
-}
-
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv('GOOGLE_CLIENT_ID')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 
 from django.urls import reverse_lazy
 
