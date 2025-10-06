@@ -59,11 +59,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'users',
     'rest_framework',
     # 'rest_framework.authtoken',
     'corsheaders',
     'dj_rest_auth',
+    'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
     'allauth',
     'allauth.account',
@@ -91,6 +93,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'middleware.CrossOriginMiddleware',
 ]
 
 ROOT_URLCONF = 'Api.urls'
@@ -114,7 +117,12 @@ WSGI_APPLICATION = 'Api.wsgi.application'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_ALL_CREDENTIALS = True
-# CORS_ALLOWED_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',  
+    'https://your-frontend-url.com',  
+]
+
+CSRF_COOKIE_HTTPONLY = False
 
 AUTHENTICATION_BACKENDS = [
    
@@ -159,23 +167,23 @@ ACCOUNT_LOGIN_METHODS = ["email"]
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'cxtPtWuFncJeJsduWqunBhckNxDTzwEP',
-        'HOST': 'mainline.proxy.rlwy.net',
-        'PORT': '15098',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'railway',
+#         'USER': 'postgres',
+#         'PASSWORD': 'cxtPtWuFncJeJsduWqunBhckNxDTzwEP',
+#         'HOST': 'mainline.proxy.rlwy.net',
+#         'PORT': '15098',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

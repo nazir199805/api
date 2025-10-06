@@ -27,13 +27,23 @@ class ProfileAdmin(ModelAdmin):
 
     def user_email(self, obj):
         return obj.user.email
+
 class CaatagoryAdmin(ModelAdmin):
     pass
 
+
+class ButtonAdmin(ModelAdmin):
+    pass
+
+class OfferAdmin(ModelAdmin):
+    pass
+
+
 admin.site.register(Api)
-admin.site.register(offer)
+admin.site.register(offer, OfferAdmin)
 admin.site.register(HeroImage, HeroImageAdmin)
-admin.site.register(HeroButton)
+# admin.site.register(HeroButton)
 admin.site.register(Catagory, CaatagoryAdmin)
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Product, ProductAdmin)
+admin.site.register(HeroButton, ButtonAdmin)

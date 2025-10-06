@@ -48,7 +48,6 @@ class offer(models.Model):
 class HeroImage(models.Model):
     image = models.ImageField(upload_to='hero/')
     title = models.CharField(max_length=255, blank=True)
-    description = models.TextField(blank=True)
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
