@@ -65,7 +65,7 @@ class HeroImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HeroImage
-        fields = ['id', 'image', 'title', 'description', 'order', 'is_active', 'buttons']
+        fields = ['id', 'image', 'title', 'order', 'is_active', 'buttons']
 
 
 
