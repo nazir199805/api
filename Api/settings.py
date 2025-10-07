@@ -371,7 +371,7 @@ UNFOLD = {
                     {
                         "title": _("Categories"),
                         "icon": "category",
-                        "link": reverse_lazy("admin:users_catagory_changelist"),
+                        "link": reverse_lazy("admin:users_category_changelist"),
                     },
                     {
                         "title": _("Tags"),

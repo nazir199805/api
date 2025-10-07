@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from .models import Api, offer, HeroImage,  category,  Product, Favorite, Cart, Notification, Order
+from .models import Api, offer, HeroImage,  Category,  Product, Favorite, Cart, Notification, Order
 from .serializers import  OfferSerializer, HeroImageSerializer, ApiSerializer, ProductSerializer, FavoriteSerializer, CartSerializer, NotificationSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -90,7 +90,7 @@ class FilterProductView(APIView):
 
         # Apply category filter if category is provided
         if category_name:
-            category = get_object_or_404(category, name=category_name)
+            category = get_object_or_404(Category, name=category_name)
             queryset = queryset.filter(category=category)
 
         # Apply tag filter if tags are provided

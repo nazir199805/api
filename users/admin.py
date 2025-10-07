@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Api, offer, HeroImage, HeroButton, category, Profile, Product, ProductImage
+from .models import Api, offer, HeroImage, HeroButton, Category, Profile, Product, ProductImage
 from unfold.admin import ModelAdmin
 from image_uploader_widget.admin import ImageUploaderInline
 from image_uploader_widget.widgets import ImageUploaderWidget
@@ -128,7 +128,7 @@ admin.site.register(Brand, BrandAdmin)
 admin.site.register(offer, OfferAdmin)
 admin.site.register(HeroImage, HeroImageAdmin)
 # admin.site.register(HeroButton)
-admin.site.register(category, CaatagoryAdmin)
+admin.site.register(Category, CaatagoryAdmin)
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(HeroButton, ButtonAdmin)
