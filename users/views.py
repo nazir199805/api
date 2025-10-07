@@ -1,19 +1,17 @@
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from .models import Api, offer, HeroImage,  Catagory,  Product, Favorite, Cart, Notification
+from .models import Api, offer, HeroImage,  Catagory,  Product, Favorite, Cart, Notification, Order
 from .serializers import  OfferSerializer, HeroImageSerializer, ApiSerializer, ProductSerializer, FavoriteSerializer, CartSerializer, NotificationSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView, LoginView
 from rest_framework import status
+from .serializers import OrderSerializer
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
-from rest_framework.generics import ListAPIView
-
 from rest_framework.decorators import action
 
 class GoogleLogin(SocialLoginView): 
@@ -123,3 +121,20 @@ class NotificationViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(notification)
         return Response(serializer.data)
+
+
+
+class UserOrderViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
+    
+
+def dashboard_callback(request, context):
+    context.update({
+        "custom_variable": "value",
+    })
+
+    return context

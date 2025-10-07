@@ -4,6 +4,7 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from taggit.serializers import (TagListSerializerField, TaggitSerializer)
 from dj_rest_auth.serializers import LoginSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import Order, OrderItem
 
 
 class CustomLoginSerializer(LoginSerializer):
@@ -116,7 +117,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'price', 'color', 'catagory', 'tags', 'is_favorited','sub_images',]
+        fields = ['id', 'name', 'price', 'color', 'catagory','brand', 'tags', 'is_favorited','sub_images',]
 
     def get_is_favorited(self, obj):
         user = self.context.get('user')  
@@ -150,6 +151,7 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ['id', 'user', 'user_username', 'is_active', 'items']
+        read_only_fields = ['user']
 
 
 class NotificationSerializer(serializers.ModelSerializer):
@@ -167,3 +169,18 @@ class NotificationSerializer(serializers.ModelSerializer):
         instance.is_read = validated_data.get('is_read', instance.is_read)
         instance.save()
         return instance
+    
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ['product', 'quantity', 'price']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+
+    class Meta:
+        model = Order
+        fields = ['id', 'created_at', 'status', 'total_amount', 'items']

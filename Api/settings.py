@@ -53,6 +53,7 @@ REST_USE_JWT = True
 
 INSTALLED_APPS = [
     'unfold',
+    'unfold.contrib.import_export',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -77,6 +78,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.apple',
     'taggit',
     "image_uploader_widget",
+    'import_export',
+    
     
 ]
 
@@ -112,6 +115,8 @@ TEMPLATES = [
         },
     },
 ]
+
+
 
 WSGI_APPLICATION = 'Api.wsgi.application'
 
@@ -268,6 +273,7 @@ from django.urls import reverse_lazy
 
 
 UNFOLD = {
+    "DASHBOARD_CALLBACK": "users.views.dashboard_callback",
     "SHOW_LANGUAGES": True,
     "SITE_TITLE": "About You",
     "SITE_HEADER": "About You Admin",

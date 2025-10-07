@@ -4,7 +4,34 @@ from unfold.admin import ModelAdmin
 from image_uploader_widget.admin import ImageUploaderInline
 from image_uploader_widget.widgets import ImageUploaderWidget
 from django.db import models
-from .models import Product, Favorite, Cart, CartItem, Notification
+from .models import Product, Favorite, Cart, CartItem, Notification,Order, OrderItem, Brand
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
+from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
+from unfold.admin import ModelAdmin
+from import_export.admin import ImportExportModelAdmin
+from unfold.contrib.import_export.forms import ExportForm, ImportForm, SelectableFieldsExportForm
+
+
+admin.site.unregister(User)
+admin.site.unregister(Group)
+
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin, ModelAdmin):
+    # Forms loaded from `unfold.forms`
+    form = UserChangeForm
+    add_form = UserCreationForm
+    change_password_form = AdminPasswordChangeForm
+
+
+@admin.register(Group)
+class GroupAdmin(BaseGroupAdmin, ModelAdmin):
+    pass
+
+
+
 
 
 class ProductImagesTab(ImageUploaderInline):
@@ -84,8 +111,20 @@ class ButtonAdmin(ModelAdmin):
 class OfferAdmin(ModelAdmin):
     pass
 
+class OrderAdmin(ModelAdmin, ImportExportModelAdmin):
+    list_display = ['user', 'status', 'total_amount']
+    import_form_class = ImportForm
+    export_form_class = ExportForm
+
+class OrderItemAdmin(ModelAdmin):
+    pass
+
+class BrandAdmin(ModelAdmin):
+    pass
+
 
 admin.site.register(Api)
+admin.site.register(Brand, BrandAdmin)
 admin.site.register(offer, OfferAdmin)
 admin.site.register(HeroImage, HeroImageAdmin)
 # admin.site.register(HeroButton)
@@ -93,3 +132,5 @@ admin.site.register(Catagory, CaatagoryAdmin)
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(HeroButton, ButtonAdmin)
+admin.site.register(Order, OrderAdmin)
+admin.site.register(OrderItem, OrderItemAdmin)
