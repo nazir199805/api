@@ -13,6 +13,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from rest_framework.decorators import action
+from taggit.models import Tag 
 
 class GoogleLogin(SocialLoginView): 
     adapter_class = GoogleOAuth2Adapter
@@ -80,17 +81,26 @@ class ProductViewSet(viewsets.ModelViewSet):
 class FilterProductView(APIView):
     
     def post(self, request):
-        catagory = request.data.get('catagory')
-        print(catagory)
+        # Get category and tags from the request body
+        category_name = request.data.get('category')
+        tags = request.data.get('tags', [])
+        
+        # Start with all products
         queryset = Product.objects.all()
 
-    
-        if catagory:
-            catagory_obj = get_object_or_404(Catagory, name=catagory)
-            queryset = queryset.filter(catagory=catagory_obj)
-       
+        # Apply category filter if category is provided
+        if category_name:
+            category = get_object_or_404(Catagory, name=category_name)
+            queryset = queryset.filter(catagory=category)
 
+        # Apply tag filter if tags are provided
+        if tags:
+            queryset = queryset.filter(tags__name__in=tags).distinct()
+
+        # Serialize the filtered queryset
         serializer = ProductSerializer(queryset, many=True)
+
+        # Return the filtered products
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

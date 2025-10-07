@@ -289,7 +289,7 @@ UNFOLD = {
 
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
-    "SHOW_BACK_BUTTON": False,
+    "SHOW_BACK_BUTTON": True,
 
     
     "BORDER_RADIUS": "6px",
@@ -320,7 +320,9 @@ UNFOLD = {
 
 
     "SIDEBAR": {
-        "show_search": False,
+        "show_search": True,
+        "command_search": True,  
+        "show_all_applications": True,  
         "navigation": [
             {
                 "title": _("Navigation"),
@@ -333,11 +335,13 @@ UNFOLD = {
                     },
                 ],
             },
-            {
+            {   
                 "title": _("User Management"),
+                "collapsible": True,
                 "separator": True,
                 "items": [
                     {
+                        
                         "title": _("Users"),
                         "icon": "people",
                         "link": reverse_lazy("admin:auth_user_changelist"),
@@ -356,6 +360,7 @@ UNFOLD = {
             },
             {
                 "title": _("Store"),
+                "collapsible": True,
                 "separator": True,
                 "items": [
                     {
@@ -382,6 +387,7 @@ UNFOLD = {
             },
             {
                 "title": _("Cart"),
+                "collapsible": True,
                 "separator": True,
                 "items": [
                     {
@@ -398,6 +404,7 @@ UNFOLD = {
             },
             {
                 "title": _("Frontend CMS"),
+                "collapsible": True,
                 "separator": True,
                 "items": [
                     {

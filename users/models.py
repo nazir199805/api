@@ -35,7 +35,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10,decimal_places=2)
     color = models.CharField(max_length=300, null=True, blank=True)
     catagory = models.ForeignKey(Catagory, on_delete=models.SET_NULL, null=True)
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
 
 
@@ -46,7 +46,7 @@ class Product(models.Model):
 
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart')  # Linking to user
-    is_active = models.BooleanField(default=True)  # To track if the cart is active
+    is_active = models.BooleanField(default=False)  # To track if the cart is active
 
     def __str__(self):
         return f"Cart for {self.user.username}"
@@ -86,6 +86,7 @@ class Notification(models.Model):
     message = models.TextField()  
     created_at = models.DateTimeField(auto_now_add=True)  
     is_read = models.BooleanField(default=False)  # To track if the user has read the notification
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"Notification for {self.user.username} - {'Read' if self.is_read else 'Unread'}"
