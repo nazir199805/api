@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Api, offer, HeroImage, HeroButton, Catagory, Profile, Product, ProductImage, Notification
+from .models import Api, offer, HeroImage, HeroButton, category, Profile, Product, ProductImage, Notification
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from taggit.serializers import (TagListSerializerField, TaggitSerializer)
 from dj_rest_auth.serializers import LoginSerializer
@@ -90,20 +90,20 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ['image']
 
-class CatagorySerializer(serializers.ModelSerializer):
+class categorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Catagory
+        model = category
         fields = ['name']
 
 
 # class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 #    sub_images = ProductImageSerializer(many=True, read_only=True)
-#    catagory = serializers.StringRelatedField()
+#    category = serializers.StringRelatedField()
 #    tags = TagListSerializerField()
 
 #    class Meta:
 #       model = Product
-#       fields = ['id', 'name', 'price', 'color', 'tags', 'is_favorite', 'sub_images', 'catagory']
+#       fields = ['id', 'name', 'price', 'color', 'tags', 'is_favorite', 'sub_images', 'category']
 
  
 
@@ -112,12 +112,12 @@ from .models import Product, Favorite, Cart, CartItem
 class ProductSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     sub_images = ProductImageSerializer(many=True, read_only=True)
-    catagory = serializers.StringRelatedField()
+    category = serializers.StringRelatedField()
     tags = TagListSerializerField()
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'price', 'color', 'catagory','brand', 'tags', 'is_favorited','sub_images',]
+        fields = ['id', 'name', 'price', 'color', 'category','brand', 'tags', 'is_favorited','sub_images',]
 
     def get_is_favorited(self, obj):
         user = self.context.get('user')  

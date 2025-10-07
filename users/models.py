@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 
 
 
-CATAGORY = (
+category = (
     ("women", "Women"),
     ("Men", "Men"),
     ("kids", "Kids")
@@ -23,8 +23,8 @@ class Brand(models.Model):
         return self.name
 
 
-class Catagory(models.Model):
-    name = models.CharField(max_length=300, choices=CATAGORY)
+class category(models.Model):
+    name = models.CharField(max_length=300, choices=category)
 
     def __str__(self):
         return self.name
@@ -34,7 +34,7 @@ class Product(models.Model):
     name = models.CharField(max_length=300)
     price = models.DecimalField(max_digits=10,decimal_places=2)
     color = models.CharField(max_length=300, null=True, blank=True)
-    catagory = models.ForeignKey(Catagory, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(category, on_delete=models.SET_NULL, null=True)
     tags = TaggableManager(blank=True)
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
 
