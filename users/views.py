@@ -13,10 +13,65 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from rest_framework.decorators import action
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
+import requests
+from dj_rest_auth.jwt_auth import set_jwt_access_cookie, set_jwt_refresh_cookie
+
+class FacebookLogin(SocialLoginView):
+    adapter_class = FacebookOAuth2Adapter
 
 
 class GoogleLogin(SocialLoginView): 
     adapter_class = GoogleOAuth2Adapter
+    callback_url = 'postmassage'
+    client_class = OAuth2Client
+
+
+
+
+
+class GoogleCodeExchangeView(APIView):
+    def post(self, request):
+        code = request.data.get('code')
+        print(f"code: {code}")
+
+        if not code:
+            return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        url = "https://tashya-mendez.onrender.com/auth/google/"
+
+        try:
+            google_res = requests.post(url, json={'code': code})
+        except Exception as e:
+            return Response({"detail": f"Request failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        if google_res.status_code == status.HTTP_200_OK:
+            data = google_res.json()
+            access_token = data.get("access")
+            refresh_token = data.get("refresh")
+
+            if not access_token or not refresh_token:
+                return Response({"detail": "Missing tokens from response"}, status=status.HTTP_400_BAD_REQUEST)
+
+            res = Response(
+                {"detail": "Able to get the tokens"},
+                status=status.HTTP_200_OK
+            )
+
+            set_jwt_access_cookie(res, access_token)
+            set_jwt_refresh_cookie(res, refresh_token)
+
+            return res
+        else:
+            return Response(
+                {
+                    "detail": "Failed to exchange code",
+                    "status_code": google_res.status_code,
+                    "response": google_res.text,
+                },
+                status=google_res.status_code
+            )
 
 
 

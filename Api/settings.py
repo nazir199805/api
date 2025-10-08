@@ -28,8 +28,9 @@ ALLOWED_HOSTS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        'rest_framework.authentication.TokenAuthentication',
+        
     ),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
@@ -47,15 +48,16 @@ SIMPLE_JWT = {
 }
 
 
-REST_USE_JWT = True
-REST_AUTH = {
-    "USE_JWT": True, 
-    "TOKEN_MODEL": None,
-}
 
 REST_USE_JWT = True
 
+JWT_AUTH_COOKIE = "access"
+JWT_AUTH_REFRESH_COOKIE = "refresh"
+JWT_AUTH_SECURE = True  # change to True in production (with HTTPS)
+JWT_AUTH_HTTPONLY = True
+JWT_AUTH_SAMESITE = "Lax"
 
+SITE_ID = 1
 # Application definition
 
 INSTALLED_APPS = [
@@ -173,7 +175,7 @@ CSRF_COOKIE_HTTPONLY = False
 
 
 
-SITE_ID = 1
+
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "nazirsherzad12345@gmail.com"  
