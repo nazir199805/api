@@ -51,11 +51,13 @@ SIMPLE_JWT = {
 
 REST_USE_JWT = True
 
-JWT_AUTH_COOKIE = "access"
-JWT_AUTH_REFRESH_COOKIE = "refresh"
-JWT_AUTH_SECURE = True  # change to True in production (with HTTPS)
-JWT_AUTH_HTTPONLY = True
-JWT_AUTH_SAMESITE = "Lax"
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'my-app-auth',
+    'JWT_AUTH_REFRESH_COOKIE': 'my-refresh-token',
+    'JWT_AUTH_SAMESITE':"none",
+    'JWT_AUTH_SECURE':True,
+}
 
 SITE_ID = 1
 # Application definition

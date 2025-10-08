@@ -24,7 +24,7 @@ class FacebookLogin(SocialLoginView):
 
 class GoogleLogin(SocialLoginView): 
     adapter_class = GoogleOAuth2Adapter
-    callback_url = 'postmassage'
+    callback_url = 'postmessage'
     client_class = OAuth2Client
 
 
