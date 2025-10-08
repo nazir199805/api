@@ -55,7 +55,7 @@ REST_AUTH = {
     'USE_JWT': True,
     'JWT_AUTH_COOKIE': 'my-app-auth',
     'JWT_AUTH_REFRESH_COOKIE': 'my-refresh-token',
-    'JWT_AUTH_SAMESITE':"none",
+    'JWT_AUTH_SAMESITE':"None",
     'JWT_AUTH_SECURE':True,
 }
 
@@ -98,9 +98,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -134,12 +134,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Api.wsgi.application'
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_ALL_CREDENTIALS = True
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:5173',  
-#     'https://your-frontend-url.com',  
-# ]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',  
+    'https://tashya-mendez.onrender.com',  
+]
 
 CSRF_COOKIE_HTTPONLY = False
 
@@ -170,12 +170,17 @@ CSRF_TRUSTED_ORIGINS = [
     "https://localhost:3000",
     "https://tashya-mendez.onrender.com",
     'https://127.0.0.1',
+    'http://localhost:5173/,'
 
 ]
 
 CSRF_COOKIE_HTTPONLY = False  
 
 
+
+
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 
 
 
