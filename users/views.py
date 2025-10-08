@@ -15,9 +15,75 @@ from dj_rest_auth.registration.views import SocialLoginView
 from rest_framework.decorators import action
 from taggit.models import Tag 
 
-class GoogleLogin(SocialLoginView): 
-    adapter_class = GoogleOAuth2Adapter
+# class GoogleLogin(SocialLoginView): 
+#     adapter_class = GoogleOAuth2Adapter
 
+import requests
+from django.conf import settings
+from allauth.socialaccount.models import SocialApp
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class GoogleLoginSafe(APIView):
+    """
+    Receives only the authorization code from frontend,
+    exchanges it for access_token and id_token securely,
+    then creates or fetches the user.
+    """
+    def post(self, request):
+        code = request.data.get('code')
+        if not code:
+            return Response({"error": "Missing authorization code"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get Google OAuth credentials from Django SocialApp
+        try:
+            app = SocialApp.objects.get(provider='google')
+        except SocialApp.DoesNotExist:
+            return Response({"error": "Google SocialApp not configured"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        data = {
+            "code": code,
+            "client_id": app.client_id,
+            "client_secret": app.secret,
+            "redirect_uri": "http://localhost:5173",  # Must match the frontend redirect
+            "grant_type": "authorization_code"
+        }
+
+        # Exchange code for tokens
+        token_url = "https://oauth2.googleapis.com/token"
+        token_resp = requests.post(token_url, data=data)
+        if token_resp.status_code != 200:
+            return Response({"error": "Failed to get tokens from Google", "details": token_resp.json()}, status=status.HTTP_400_BAD_REQUEST)
+
+        tokens = token_resp.json()  # contains access_token, id_token, expires_in, etc.
+        id_token = tokens.get('id_token')
+        access_token = tokens.get('access_token')
+
+        # Optional: validate id_token with Google if needed
+
+        # Optional: get user info
+        user_info_resp = requests.get(
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"}
+        )
+
+        if user_info_resp.status_code != 200:
+            return Response({"error": "Failed to fetch user info from Google"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_info = user_info_resp.json()
+        email = user_info.get("email")
+        if not email:
+            return Response({"error": "Google did not return an email"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create or get user
+        user, created = User.objects.get_or_create(email=email, defaults={"username": email.split("@")[0]})
+
+        return Response({
+            "user": {"id": user.id, "email": user.email, "username": user.username},
+            "access_token": access_token,
+            "id_token": id_token
+        })
 
 
 
