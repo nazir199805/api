@@ -142,9 +142,38 @@ class UserOrderViewSet(viewsets.ReadOnlyModelViewSet):
         return Order.objects.filter(user=self.request.user)
     
 
-def dashboard_callback(request, context):
-    context.update({
-        "custom_variable": "value",
-    })
 
+
+from .models import Product, Order, Notification, Favorite, offer, User
+
+
+
+
+
+
+
+
+def dashboard_callback(request, context):
+    # Fetching data for dashboard stats
+    total_products = Product.objects.count()
+    pending_orders = Order.objects.filter(status="pending").count()
+    unread_notifications = Notification.objects.all().count()
+    total_favorites = Product.objects.all().count()
+
+    # Fetching recent products (you can adjust the limit as needed)
+    recent_products = Product.objects.all()[:5]
+
+    # Offer data (assuming the 'Offer' model contains discount information)
+    offer1 = offer.objects.last()  # Fetching the most recent offer
+
+    # Passing data to the template
+    context.update({
+        'pending_orders': pending_orders,
+        'unread_notifications': unread_notifications,
+        'total_favorites': total_favorites,
+        'recent_products': recent_products,
+        'offer': offer,
+        'total_products': total_products,  # Any custom variable you want to add
+    })
     return context
+

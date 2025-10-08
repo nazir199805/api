@@ -18,18 +18,25 @@ SECRET_KEY = 'django-insecure-%sgu-!itv9-q^qtel#c1#9n)u(%d1-i@gsbv$ab_bi@(@up!0f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'tashya-mendez.onrender.com',
+    'localhost',
+    '127.0.0.1'
+]
 
 
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        'rest_framework.authentication.TokenAuthentication',
     ),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
 }
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
@@ -53,6 +60,7 @@ REST_USE_JWT = True
 
 INSTALLED_APPS = [
     'unfold',
+    "admin_dashboard.apps.AdminDashboardConfig",
     'unfold.contrib.import_export',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -71,7 +79,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'dj_rest_auth.registration',
-    'social_django',
+    # 'social_django',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
@@ -96,7 +104,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'middleware.CrossOriginMiddleware',
+    # 'middleware.CrossOriginMiddleware',
 ]
 
 ROOT_URLCONF = 'Api.urls'
@@ -104,7 +112,9 @@ ROOT_URLCONF = 'Api.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates',
+                 BASE_DIR / 'venv/Lib/site-packages/unfold/templates',],
+        
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,10 +132,10 @@ WSGI_APPLICATION = 'Api.wsgi.application'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_ALL_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',  
-    'https://your-frontend-url.com',  
-]
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:5173',  
+#     'https://your-frontend-url.com',  
+# ]
 
 CSRF_COOKIE_HTTPONLY = False
 
@@ -139,18 +149,24 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'users.serializers.CustomRegisterSerializer',
 }
 
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'AUTH_PARAMS': {
-            'prompt': 'select_account',  # forces account chooser popup
-            'access_type': 'online',
-        }
-    }
-}
+
+
+# SOCIALACCOUNT_PROVIDERS = {
+#     'google': {
+#         'APP': {
+#             'client_id': os.environ.get('GOOGLE_CLIENT_ID'),
+#             'secret': os.environ.get('GOOGLE_SECRET'),
+#             'key': ''
+#         }
+#     }
+# }
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
+    "https://localhost:3000",
+    "https://tashya-mendez.onrender.com",
+    'https://127.0.0.1',
+
 ]
 
 CSRF_COOKIE_HTTPONLY = False  
@@ -247,11 +263,6 @@ SOCIALACCOUNT_STORE_TOKENS = True
 
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*', 'first_name', 'last_name'] 
 
-# ACCOUNT_AUTHENTICATION_METHOD = 'email'
-# ACCOUNT_USERNAME_REQUIRED = False
-# ACCOUNT_EMAIL_REQUIRED = True
-# ACCOUNT_UNIQUE_EMAIL = True
-# ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 
 # ACCOUNT_SIGNUP_FIELDS = {
 #     'username': {
@@ -270,7 +281,7 @@ LANGUAGES = (
 
 
 from django.urls import reverse_lazy
-
+import static
 
 UNFOLD = {
     "DASHBOARD_CALLBACK": "users.views.dashboard_callback",

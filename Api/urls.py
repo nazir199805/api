@@ -18,7 +18,7 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('custom/login/', CustomLoginView.as_view(),name='customLogin'),
     path('auth/', include('dj_rest_auth.urls')),
-    # path('auth/', include('allauth.socialaccount.urls')),    
+    path('auth/social/', include('allauth.socialaccount.urls')),
     path('auth/google/', GoogleLogin.as_view(), name='google_login'),
     path('auth/register/', include('dj_rest_auth.registration.urls')),  # Sign up
     # path('auth/google/', include('allauth.socialaccount.providers.google.urls')),
@@ -33,3 +33,6 @@ urlpatterns += i18n_patterns(
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
