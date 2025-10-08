@@ -37,92 +37,19 @@ class GoogleLogin(SocialLoginView):
 from django.conf import settings
 User = get_user_model()
 
-# class GoogleCodeExchangeView(APIView):
-#     def post(self, request):
-#         code = request.data.get('code')
-#         if not code:
-#             return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # Exchange code with Google
-#         token_url = "https://oauth2.googleapis.com/token"
-#         payload = {
-#             "code": code,
-#             "client_id": settings.GOOGLE_CLIENT_ID,
-#             "client_secret": settings.GOOGLE_CLIENT_SECRET,
-#             "redirect_uri": "http://localhost:5173",
-#             "grant_type": "authorization_code",
-#         }
-
-#         try:
-#             google_res = requests.post(token_url, data=payload)
-#             google_res.raise_for_status()
-#         except requests.RequestException as e:
-#             return Response({"detail": f"Google token exchange failed: {str(e)}"},
-#                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#         token_data = google_res.json()
-#         id_token_str = token_data.get("id_token")  # <-- here we get the id_token
-
-#         if not id_token_str:
-#             return Response({"detail": "Missing ID token from Google response"},
-#                             status=status.HTTP_400_BAD_REQUEST)
-
-#         # --------------------------
-#         # VERIFY THE GOOGLE ID TOKEN
-#         # --------------------------
-#         try:
-#             idinfo = id_token.verify_oauth2_token(
-#                 id_token_str, google_requests.Request(), settings.GOOGLE_CLIENT_ID
-#             )
-#         except ValueError:
-#             return Response({"detail": "Invalid ID token"}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # Extract user info
-#         email = idinfo.get("email")
-#         name = idinfo.get("name")
-
-#         # Get or create the user in Django
-#         user, created = User.objects.get_or_create(
-#             email=email,
-#             defaults={"username": email, "first_name": name}
-#         )
-
-#         # Set JWT cookies for frontend authentication
-#         res = Response({"detail": "Login successful"}, status=status.HTTP_200_OK)
-#         set_jwt_access_cookie(res, id_token_str)  # optionally generate your own JWT
-#         # set_jwt_refresh_cookie(res, refresh_token)  # if using refresh tokens
-
-#         return res
-
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-import requests
-from django.conf import settings
-from django.contrib.auth import get_user_model
-from dj_rest_auth.jwt_auth import set_jwt_access_cookie, set_jwt_refresh_cookie
-from rest_framework_simplejwt.tokens import RefreshToken
-from google.oauth2 import id_token as google_id_token
-from google.auth.transport import requests as google_requests
-
-User = get_user_model()
-
 class GoogleCodeExchangeView(APIView):
     def post(self, request):
         code = request.data.get('code')
         if not code:
             return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # --------------------------
-        # EXCHANGE CODE WITH GOOGLE
-        # --------------------------
+        # Exchange code with Google
         token_url = "https://oauth2.googleapis.com/token"
         payload = {
             "code": code,
             "client_id": settings.GOOGLE_CLIENT_ID,
             "client_secret": settings.GOOGLE_CLIENT_SECRET,
-            "redirect_uri": "http://localhost:5173",  # must match frontend
+            "redirect_uri": "http://localhost:5173",
             "grant_type": "authorization_code",
         }
 
@@ -134,7 +61,8 @@ class GoogleCodeExchangeView(APIView):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         token_data = google_res.json()
-        id_token_str = token_data.get("id_token")
+        id_token_str = token_data.get("id_token")  # <-- here we get the id_token
+
         if not id_token_str:
             return Response({"detail": "Missing ID token from Google response"},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -143,48 +71,73 @@ class GoogleCodeExchangeView(APIView):
         # VERIFY THE GOOGLE ID TOKEN
         # --------------------------
         try:
-            idinfo = google_id_token.verify_oauth2_token(
+            idinfo = id_token.verify_oauth2_token(
                 id_token_str, google_requests.Request(), settings.GOOGLE_CLIENT_ID
             )
         except ValueError:
             return Response({"detail": "Invalid ID token"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # --------------------------
-        # GET OR CREATE DJANGO USER
-        # --------------------------
+        # Extract user info
         email = idinfo.get("email")
         name = idinfo.get("name")
 
+        # Get or create the user in Django
         user, created = User.objects.get_or_create(
             email=email,
             defaults={"username": email, "first_name": name}
         )
 
-        # --------------------------
-        # GENERATE DJANGO JWT TOKENS
-        # --------------------------
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-        refresh_token = str(refresh)
-
-        # --------------------------
-        # RETURN TOKENS & USER INFO
-        # --------------------------
-        res = Response({
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "user": {
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-            }
-        }, status=status.HTTP_200_OK)
-
-        # Optionally set JWT cookies for frontend (HttpOnly)
-        set_jwt_access_cookie(res, access_token)
-        set_jwt_refresh_cookie(res, refresh_token)
+        # Set JWT cookies for frontend authentication
+        res = Response({"detail": "Login successful"}, status=status.HTTP_200_OK)
+        set_jwt_access_cookie(res, id_token_str)  # optionally generate your own JWT
+        # set_jwt_refresh_cookie(res, refresh_token)  # if using refresh tokens
 
         return res
+
+
+
+
+# class GoogleCodeExchangeView(APIView):
+#     def post(self, request):
+#         code = request.data.get('code')
+#         print(f"code: {code}")
+
+#         if not code:
+#             return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+#         url = "https://tashya-mendez.onrender.com/auth/google/"
+
+#         try:
+#             google_res = requests.post(url, json={'code': code})
+#         except Exception as e:
+#             return Response({"detail": f"Request failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#         if google_res.status_code == status.HTTP_200_OK:
+#             data = google_res.json()
+#             access_token = data.get("access")
+#             refresh_token = data.get("refresh")
+
+#             if not access_token or not refresh_token:
+#                 return Response({"detail": "Missing tokens from response"}, status=status.HTTP_400_BAD_REQUEST)
+
+#             res = Response(
+#                 {"detail": "Able to get the tokens"},
+#                 status=status.HTTP_200_OK
+#             )
+
+#             set_jwt_access_cookie(res, access_token)
+#             set_jwt_refresh_cookie(res, refresh_token)
+
+#             return res
+#         else:
+#             return Response(
+#                 {
+#                     "detail": "Failed to exchange code",
+#                     "status_code": google_res.status_code,
+#                     "response": google_res.text,
+#                 },
+#                 status=google_res.status_code
+#             )
 
 
 
