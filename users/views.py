@@ -20,25 +20,34 @@ from dj_rest_auth.jwt_auth import set_jwt_access_cookie, set_jwt_refresh_cookie
 from django.contrib.auth import get_user_model
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from django.conf import settings
+User = get_user_model()
+
+
 
 class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
 
 
-class GoogleLogin(SocialLoginView): 
-    adapter_class = GoogleOAuth2Adapter
-    callback_url = 'postmessage'
-    client_class = OAuth2Client
 
 
 
 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from dj_rest_auth.views import LoginView
+from rest_framework_simplejwt.tokens import RefreshToken
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 from django.conf import settings
+from django.contrib.auth import get_user_model
+
 User = get_user_model()
 
-class GoogleCodeExchangeView(APIView):
-    def post(self, request):
+class GoogleCodeExchangeView(LoginView, APIView):
+    def post(self, request, *args, **kwargs):
         code = request.data.get('code')
         if not code:
             return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
@@ -61,15 +70,12 @@ class GoogleCodeExchangeView(APIView):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         token_data = google_res.json()
-        id_token_str = token_data.get("id_token")  # <-- here we get the id_token
-
+        id_token_str = token_data.get("id_token")
         if not id_token_str:
             return Response({"detail": "Missing ID token from Google response"},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # --------------------------
-        # VERIFY THE GOOGLE ID TOKEN
-        # --------------------------
+        # Verify Google ID token
         try:
             idinfo = id_token.verify_oauth2_token(
                 id_token_str, google_requests.Request(), settings.GOOGLE_CLIENT_ID
@@ -77,22 +83,36 @@ class GoogleCodeExchangeView(APIView):
         except ValueError:
             return Response({"detail": "Invalid ID token"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Extract user info
         email = idinfo.get("email")
         name = idinfo.get("name")
 
-        # Get or create the user in Django
+        # Get or create the user
         user, created = User.objects.get_or_create(
             email=email,
             defaults={"username": email, "first_name": name}
         )
 
-        # Set JWT cookies for frontend authentication
-        res = Response({"detail": "Login successful"}, status=status.HTTP_200_OK)
-        set_jwt_access_cookie(res, id_token_str)  # optionally generate your own JWT
-        # set_jwt_refresh_cookie(res, refresh_token)  # if using refresh tokens
+        # Generate JWT tokens like in CustomLoginView
+        refresh = RefreshToken.for_user(user)
+        access = str(refresh.access_token)
 
-        return res
+        response_data = {
+        "access": access,
+        "refresh": str(refresh),
+        "role": "admin" if user.is_staff or user.is_superuser else "user",
+        "username": user.username,
+        "email": user.email
+}
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
 
 
 
@@ -100,44 +120,60 @@ class GoogleCodeExchangeView(APIView):
 # class GoogleCodeExchangeView(APIView):
 #     def post(self, request):
 #         code = request.data.get('code')
-#         print(f"code: {code}")
-
 #         if not code:
 #             return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-#         url = "https://tashya-mendez.onrender.com/auth/google/"
+#         # Exchange code with Google
+#         token_url = "https://oauth2.googleapis.com/token"
+#         payload = {
+#             "code": code,
+#             "client_id": settings.GOOGLE_CLIENT_ID,
+#             "client_secret": settings.GOOGLE_CLIENT_SECRET,
+#             "redirect_uri": "http://localhost:5173",
+#             "grant_type": "authorization_code",
+#         }
 
 #         try:
-#             google_res = requests.post(url, json={'code': code})
-#         except Exception as e:
-#             return Response({"detail": f"Request failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#             google_res = requests.post(token_url, data=payload)
+#             google_res.raise_for_status()
+#         except requests.RequestException as e:
+#             return Response({"detail": f"Google token exchange failed: {str(e)}"},
+#                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-#         if google_res.status_code == status.HTTP_200_OK:
-#             data = google_res.json()
-#             access_token = data.get("access")
-#             refresh_token = data.get("refresh")
+#         token_data = google_res.json()
+#         id_token_str = token_data.get("id_token")  # <-- here we get the id_token
 
-#             if not access_token or not refresh_token:
-#                 return Response({"detail": "Missing tokens from response"}, status=status.HTTP_400_BAD_REQUEST)
+#         if not id_token_str:
+#             return Response({"detail": "Missing ID token from Google response"},
+#                             status=status.HTTP_400_BAD_REQUEST)
 
-#             res = Response(
-#                 {"detail": "Able to get the tokens"},
-#                 status=status.HTTP_200_OK
+#         # --------------------------
+#         # VERIFY THE GOOGLE ID TOKEN
+#         # --------------------------
+#         try:
+#             idinfo = id_token.verify_oauth2_token(
+#                 id_token_str, google_requests.Request(), settings.GOOGLE_CLIENT_ID
 #             )
+#         except ValueError:
+#             return Response({"detail": "Invalid ID token"}, status=status.HTTP_400_BAD_REQUEST)
 
-#             set_jwt_access_cookie(res, access_token)
-#             set_jwt_refresh_cookie(res, refresh_token)
+#         # Extract user info
+#         email = idinfo.get("email")
+#         name = idinfo.get("name")
 
-#             return res
-#         else:
-#             return Response(
-#                 {
-#                     "detail": "Failed to exchange code",
-#                     "status_code": google_res.status_code,
-#                     "response": google_res.text,
-#                 },
-#                 status=google_res.status_code
-#             )
+#         # Get or create the user in Django
+#         user, created = User.objects.get_or_create(
+#             email=email,
+#             defaults={"username": email, "first_name": name}
+#         )
+
+#         # Set JWT cookies for frontend authentication
+#         res = Response({"detail": "Login successful"}, status=status.HTTP_200_OK)
+#         set_jwt_access_cookie(res, id_token_str)  # optionally generate your own JWT
+#         # set_jwt_refresh_cookie(res, refresh_token)  # if using refresh tokens
+
+#         return res
+
 
 
 
@@ -275,26 +311,43 @@ from .models import Product, Order, Notification, Favorite, offer, User
 
 
 def dashboard_callback(request, context):
-    # Fetching data for dashboard stats
-    total_products = Product.objects.count()
-    pending_orders = Order.objects.filter(status="pending").count()
-    unread_notifications = Notification.objects.all().count()
-    total_favorites = Product.objects.all().count()
+    """
+    Unfold expects us to receive a context dict, update it and return it.
+    Don't call render() here.
+    """
+    cards = [
+        {
+            "title": "Products",
+            "metric": Product.objects.count(),
+            "link": "admin:users_product_changelist",   # named admin url -- keep as string
+            "icon": "shopping-bag",
+        },
+        {
+            "title": "Orders",
+            "metric": Order.objects.count(),
+            "link": "admin:users_order_changelist",
+            "icon": "package",
+        },
+        {
+            "title": "Users",
+            "metric": User.objects.count(),
+            "link": "admin:auth_user_changelist",
+            "icon": "users",
+        },
+        {
+            "title": "Favorites",
+            "metric": Favorite.objects.count(),
+            "link": "admin:users_favorite_changelist",
+            "icon": "heart",
+        },
+        {
+            "title": "Unread Notifications",
+            "metric": Notification.objects.filter(is_read=False).count(),
+            "link": "admin:users_notification_changelist",
+            "icon": "bell",
+        },
+    ]
 
-    # Fetching recent products (you can adjust the limit as needed)
-    recent_products = Product.objects.all()[:5]
-
-    # Offer data (assuming the 'Offer' model contains discount information)
-    offer1 = offer.objects.last()  # Fetching the most recent offer
-
-    # Passing data to the template
-    context.update({
-        'pending_orders': pending_orders,
-        'unread_notifications': unread_notifications,
-        'total_favorites': total_favorites,
-        'recent_products': recent_products,
-        'offer': offer,
-        'total_products': total_products,  # Any custom variable you want to add
-    })
+    # update the incoming context and return it (no render)
+    context.update({"cards": cards})
     return context
-

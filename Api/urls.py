@@ -7,7 +7,7 @@ from users.serializers import CustomRegisterSerializer
 from users.views import CustomLoginView
 from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
-from users.views import GoogleLogin, FacebookLogin, GoogleCodeExchangeView
+from users.views import  FacebookLogin, GoogleCodeExchangeView
 
 
 urlpatterns = [
@@ -18,8 +18,6 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('custom/login/', CustomLoginView.as_view(),name='customLogin'),
     path('auth/', include('dj_rest_auth.urls')),
-    path('auth/social/', include('allauth.socialaccount.urls')),
-    path('auth/google/', GoogleLogin.as_view(), name='google_login'),
     path('auth/code-exchange', GoogleCodeExchangeView.as_view()),
     path('auth/facebook/', FacebookLogin.as_view(), name='facebook_login'),
     
