@@ -138,7 +138,8 @@ WSGI_APPLICATION = 'Api.wsgi.application'
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',  
-    'https://tashya-mendez.onrender.com',  
+    'https://tashya-mendez.onrender.com',
+    'http://localhost:3000'  
 ]
 
 CSRF_COOKIE_HTTPONLY = False
@@ -290,11 +291,15 @@ LANGUAGES = (
 
 
 from django.urls import reverse_lazy
-import static
+from django.templatetags.static import static
 
 UNFOLD = {
     "DASHBOARD_CALLBACK": "users.views.dashboard_callback",
     "SHOW_LANGUAGES": True,
+    "SITE_ICON": {
+        "light": lambda request: static("hero/logo.png"),  # light mode
+        "dark": lambda request: static("hero/logo.png"),  # dark mode
+    },
     "SITE_TITLE": "About You",
     "SITE_HEADER": "About You Admin",
     "SITE_SUBHEADER": "Welcome to your site admin",

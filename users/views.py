@@ -320,7 +320,7 @@ def dashboard_callback(request, context):
             "title": "Products",
             "metric": Product.objects.count(),
             "link": "admin:users_product_changelist",   # named admin url -- keep as string
-            "icon": "shopping-bag",
+            "icon": "shopping_bag",
         },
         {
             "title": "Orders",
@@ -332,19 +332,19 @@ def dashboard_callback(request, context):
             "title": "Users",
             "metric": User.objects.count(),
             "link": "admin:auth_user_changelist",
-            "icon": "users",
+            "icon": "person",
         },
         {
             "title": "Favorites",
             "metric": Favorite.objects.count(),
             "link": "admin:users_favorite_changelist",
-            "icon": "heart",
+            "icon": "favorite",
         },
         {
             "title": "Unread Notifications",
             "metric": Notification.objects.filter(is_read=False).count(),
             "link": "admin:users_notification_changelist",
-            "icon": "bell",
+            "icon": "notifications",
         },
     ]
 
