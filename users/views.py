@@ -58,7 +58,7 @@ class GoogleCodeExchangeView(LoginView, APIView):
             "code": code,
             "client_id": settings.GOOGLE_CLIENT_ID,
             "client_secret": settings.GOOGLE_CLIENT_SECRET,
-            "redirect_uri": "http://localhost:5173",
+            "redirect_uri": "http://localhost:3000",
             "grant_type": "authorization_code",
         }
 
