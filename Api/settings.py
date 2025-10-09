@@ -137,9 +137,9 @@ WSGI_APPLICATION = 'Api.wsgi.application'
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',  
     'https://tashya-mendez.onrender.com',
-    'http://localhost:3000'  
+    'http://localhost:3000',
+      
 ]
 
 CSRF_COOKIE_HTTPONLY = False
