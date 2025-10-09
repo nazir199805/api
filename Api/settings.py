@@ -300,6 +300,15 @@ UNFOLD = {
         "light": lambda request: static("hero/logo.png"),  # light mode
         "dark": lambda request: static("hero/logo.png"),  # dark mode
     },
+     "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "type": "image/svg+xml",
+            "href": lambda request: static("hero/logo.png"),
+            
+        },
+     ],
     "SITE_TITLE": "About You",
     "SITE_HEADER": "About You Admin",
     "SITE_SUBHEADER": "Welcome to your site admin",
@@ -317,37 +326,59 @@ UNFOLD = {
     "SHOW_BACK_BUTTON": True,
 
     
-    "BORDER_RADIUS": "6px",
+    "BORDER_RADIUS": "12px",
 
 "COLORS": {
-    "primary": {
-        "50": "#fffbeb",
-        "100": "#fef3c7",
-        "200": "#fde68a",
-        "300": "#fcd34d",
-        "400": "#fbbf24",
-        "500": "#f59e0b",  # main amber
-        "600": "#d97706",
-        "700": "#b45309",
-        "800": "#92400e",
-        "900": "#78350f",
-        "950": "#451a03",
+    # Neutral base — soft, balanced grays (for backgrounds, cards, borders, etc.)
+    "base": {
+        "50":  "oklch(98% 0.002 270)",   # almost white
+        "100": "oklch(96% 0.004 270)",
+        "200": "oklch(91% 0.006 270)",
+        "300": "oklch(86% 0.008 270)",
+        "400": "oklch(70% 0.010 270)",
+        "500": "oklch(55% 0.012 270)",
+        "600": "oklch(43% 0.013 270)",
+        "700": "oklch(33% 0.012 270)",
+        "800": "oklch(25% 0.010 270)",
+        "900": "oklch(17% 0.008 270)",   # near black
+        "950": "oklch(10% 0.006 270)",
     },
+
+    # Amber primary — warm golden hues (for buttons, icons, accents)
+    "primary": {
+        "50":  "oklch(98% 0.03 85)",
+        "100": "oklch(95% 0.05 85)",
+        "200": "oklch(90% 0.09 85)",
+        "300": "oklch(84% 0.13 85)",
+        "400": "oklch(75% 0.17 85)",
+        "500": "oklch(68% 0.20 85)",  # main amber
+        "600": "oklch(61% 0.19 85)",
+        "700": "oklch(52% 0.16 85)",
+        "800": "oklch(44% 0.13 85)",
+        "900": "oklch(36% 0.10 85)",
+        "950": "oklch(26% 0.08 85)",
+    },
+
+    # Font mapping (links text tone to base scale automatically)
     "font": {
         "subtle-light": "var(--color-base-500)",
         "subtle-dark": "var(--color-base-400)",
-        "default-light": "var(--color-base-600)",
-        "default-dark": "var(--color-base-300)",
+        "default-light": "var(--color-base-700)",
+        "default-dark": "var(--color-base-200)",
         "important-light": "var(--color-base-900)",
-        "important-dark": "var(--color-base-100)",
+        "important-dark": "var(--color-base-50)",
     },
 },
+
 
 
     "SIDEBAR": {
         "show_search": True,
         "command_search": True,  
         "show_all_applications": True,  
+         "STYLES": [
+            lambda request: static("css/style.css"),
+    ],
         "navigation": [
             {
                 "title": _("Navigation"),
@@ -454,11 +485,13 @@ UNFOLD = {
                     },
                 ],
             },
+            
         ],
     
+    },
 }
+    
 
 
    
-}
 

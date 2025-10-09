@@ -15,70 +15,79 @@
 <!-- Hero Section -->
 <div class="relative w-full h-96 overflow-hidden">
     <!-- Background Image -->
-    <img src="{% static 'hero/hero.jpg' %}" alt="Hero Image" class="w-full h-full object-cover filter blur-lg">
-
+    <img src="{% static 'hero/hero.jpg' %}" alt="Hero Image"
+         class="w-full h-full object-cover filter blur-lg">
+    
     <!-- Dark Overlay -->
     <div class="absolute inset-0 bg-black opacity-50"></div>
 
     <!-- Centered Text and Buttons -->
     <div class="absolute inset-0 flex flex-col justify-center items-center text-center text-white mt-24">
         <div class="space-y-4">
-            <h1 class="text-2xl font-bold my-3">Welcome to Your Dashboard</h1>
-            <p class="text-sm">Manage your products, orders, and more.</p>
+            <h1 class="text-4xl font-bold my-3">Welcome to Your Dashboard</h1>
+            <p class="text-lg">Manage your products, orders, and users easily.</p>
 
             <!-- Buttons side by side -->
             <div class="flex flex-row gap-4 justify-center mt-4">
                 {% url "admin:users_product_changelist" as users_product_link %}
                 {% trans "View Products" as products_title %}
-                {% component "unfold/components/button.html" with href=users_product_link  %}
+                {% component "unfold/components/button.html" with href=users_product_link %}
                     {{ products_title }}
                 {% endcomponent %}
 
                 {% url "admin:users_order_changelist" as orders_link %}
                 {% trans "View Orders" as orders_title %}
                 {% component "unfold/components/button.html" with href=orders_link %}
-                    {{ orders_title  }}
+                    {{ orders_title }}
                 {% endcomponent %}
             </div>
         </div>
     </div>
 </div>
 
-    <!--components -->   
- {% component "unfold/components/container.html" %}
- 
-  {% component "unfold/components/title.html" with class="text-center mt-12" %}
-    Esily Mange your Website
-  {% endcomponent %}
+<!-- Cards Section -->
+{% component "unfold/components/container.html" %}
+    {% component "unfold/components/title.html" with class="text-center mt-12 text-3xl font-bold" %}
+        Easily Manage Your Website
+    {% endcomponent %}
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-    
-    {% for card in cards %}
-    <div class="shadow-lg ">
-      <a href="{% url card.link %}" class="block">
-        {% component "unfold/components/card.html" with class="shadow-lg"   %}
-            
-            <div class="flex items-center justify-between ">
-              <div>
-                {% component "unfold/components/text.html" with class="text-xl" %}
-                  {{ card.title }}
-                {% endcomponent %}
-                {% component "unfold/components/title.html" %}
-                  {{ card.metric }}
-                {% endcomponent %}
-              </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        {% for card in cards %}
+            <div class="shadow-sm">
+                <a href="{% url card.link %}">
+                    {% component "unfold/components/card.html" with class="p-4" %}
+                        <div class="flex items-center justify-between">
+                            <div>
+                                {% component "unfold/components/text.html" with class="text-xl font-semibold" %}
+                                    {{ card.title }}
+                                {% endcomponent %}
 
-              {% component "unfold/components/icon.html"  with class="text-2xl"%}
-              {{card.icon}}
-              {% endcomponent %}
+                                {% component "unfold/components/title.html" with class="text-2xl mt-1" %}
+                                    {{ card.metric }}
+                                {% endcomponent %}
+
+                                <!-- Optional badge -->
+                                {% if card.badge %}
+                                    <span class="inline-block bg-amber-500 text-white text-xs px-2 py-1 rounded mt-1">
+                                        {{ card.badge }}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Icon with amber OKLCH color -->
+                            {% component "unfold/components/icon.html" with class="text-2xl"%}
+                                {{ card.icon }}
+                            {% endcomponent %}
+                        </div>
+                    {% endcomponent %}
+                </a>
             </div>
-        
-        {% endcomponent %}
-      </a>
-      </div>
-    {% endfor %}
-  </div>
-{% endcomponent %}
+        {% endfor %}
+    </div>
   
-{% endblock %}
+{% endcomponent %}
+{% component "unfold/components/card.html" with title="Recent Products" class="mt-12" %}
 
+    {% component "unfold/components/table.html" with table=table_data card_included=1 striped=1 %}{% endcomponent %}
+{% endcomponent %}
+{% endblock %}

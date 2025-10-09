@@ -83,14 +83,23 @@ class GoogleCodeExchangeView(LoginView, APIView):
         except ValueError:
             return Response({"detail": "Invalid ID token"}, status=status.HTTP_400_BAD_REQUEST)
 
-        email = idinfo.get("email")
-        name = idinfo.get("name")
+        email_str = idinfo.get("email")
+        first_name = idinfo.get("given_name", "")   # Google first name
+        last_name = idinfo.get("family_name", "")   # Google last name
+        username = email_str.split('@')[0]
 
         # Get or create the user
         user, created = User.objects.get_or_create(
-            email=email,
-            defaults={"username": email, "first_name": name}
+            email=email_str,
+            defaults={"username": username, "first_name": first_name, "last_name": last_name}
         )
+
+        # Optional: update name if user already exists
+        if not created:
+            user.first_name = first_name
+            user.last_name = last_name
+            user.save()
+
 
         # Generate JWT tokens like in CustomLoginView
         refresh = RefreshToken.for_user(user)
@@ -99,10 +108,16 @@ class GoogleCodeExchangeView(LoginView, APIView):
         response_data = {
         "access": access,
         "refresh": str(refresh),
-        "role": "admin" if user.is_staff or user.is_superuser else "user",
-        "username": user.username,
-        "email": user.email
+        "user": {
+            "pk": user.pk,
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name
+        },
+        "role": "admin" if user.is_staff or user.is_superuser else "user"
 }
+
 
         return Response(response_data, status=status.HTTP_200_OK)
 
@@ -110,69 +125,6 @@ class GoogleCodeExchangeView(LoginView, APIView):
 
 
 
-
-
-
-
-
-
-
-# class GoogleCodeExchangeView(APIView):
-#     def post(self, request):
-#         code = request.data.get('code')
-#         if not code:
-#             return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # Exchange code with Google
-#         token_url = "https://oauth2.googleapis.com/token"
-#         payload = {
-#             "code": code,
-#             "client_id": settings.GOOGLE_CLIENT_ID,
-#             "client_secret": settings.GOOGLE_CLIENT_SECRET,
-#             "redirect_uri": "http://localhost:5173",
-#             "grant_type": "authorization_code",
-#         }
-
-#         try:
-#             google_res = requests.post(token_url, data=payload)
-#             google_res.raise_for_status()
-#         except requests.RequestException as e:
-#             return Response({"detail": f"Google token exchange failed: {str(e)}"},
-#                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#         token_data = google_res.json()
-#         id_token_str = token_data.get("id_token")  # <-- here we get the id_token
-
-#         if not id_token_str:
-#             return Response({"detail": "Missing ID token from Google response"},
-#                             status=status.HTTP_400_BAD_REQUEST)
-
-#         # --------------------------
-#         # VERIFY THE GOOGLE ID TOKEN
-#         # --------------------------
-#         try:
-#             idinfo = id_token.verify_oauth2_token(
-#                 id_token_str, google_requests.Request(), settings.GOOGLE_CLIENT_ID
-#             )
-#         except ValueError:
-#             return Response({"detail": "Invalid ID token"}, status=status.HTTP_400_BAD_REQUEST)
-
-#         # Extract user info
-#         email = idinfo.get("email")
-#         name = idinfo.get("name")
-
-#         # Get or create the user in Django
-#         user, created = User.objects.get_or_create(
-#             email=email,
-#             defaults={"username": email, "first_name": name}
-#         )
-
-#         # Set JWT cookies for frontend authentication
-#         res = Response({"detail": "Login successful"}, status=status.HTTP_200_OK)
-#         set_jwt_access_cookie(res, id_token_str)  # optionally generate your own JWT
-#         # set_jwt_refresh_cookie(res, refresh_token)  # if using refresh tokens
-
-#         return res
 
 
 
@@ -316,6 +268,12 @@ def dashboard_callback(request, context):
     Don't call render() here.
     """
     cards = [
+         {
+            "title": "Hero Section",
+            "metric": HeroImage.objects.all().count(),
+            "link": "admin:users_heroimage_changelist",
+            "icon": "image",
+        },
         {
             "title": "Products",
             "metric": Product.objects.count(),
@@ -346,8 +304,21 @@ def dashboard_callback(request, context):
             "link": "admin:users_notification_changelist",
             "icon": "notifications",
         },
+       
     ]
+    recent_products = Product.objects.all()[:5]  # adjust field if needed
+
+    # Build table data
+    table_data = {
+        "headers": ["Name", "Price", "Brand", "Category", "Color"],
+        "rows": [
+            [p.name, f"${p.price}", p.brand, p.category, p.color]
+            for p in recent_products
+        ]
+    }
 
     # update the incoming context and return it (no render)
-    context.update({"cards": cards})
+    context.update({"cards": cards,
+                    "table_data":table_data,
+                })
     return context
