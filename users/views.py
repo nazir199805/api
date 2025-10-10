@@ -105,97 +105,69 @@ class GoogleCodeExchangeView(LoginView, APIView):
 # Login wuth Facebook View
 class FacebookLogin(APIView):
     def post(self, request, *args, **kwargs):
-        code = request.data.get('code')
+        code = request.data.get("code")
         if not code:
             return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Exchange code for access token with Facebook
-        token_url = "https://graph.facebook.com/v12.0/oauth/access_token"
-        payload = {
+        # 1️⃣ Exchange code for access token
+        token_url = "https://graph.facebook.com/v19.0/oauth/access_token"
+        params = {
+            "client_id": settings.SOCIAL_AUTH_FACEBOOK_KEY,
+            "redirect_uri": "http://localhost:3000",  # Must match your frontend redirect
+            "client_secret": settings.FSOCIAL_AUTH_FACEBOOK_SECRET,
             "code": code,
-            "client_id": settings.SOCIAL_AUTH_FACEBOOK_KEY,  # Your Facebook App ID
-            "client_secret": settings.SOCIAL_AUTH_FACEBOOK_SECRET,  # Your Facebook App Secret
-            "redirect_uri":  "http://localhost:3000",
         }
 
         try:
-            facebook_res = requests.post(token_url, data=payload)
-            facebook_res.raise_for_status()
+            token_res = requests.get(token_url, params=params)
+            token_res.raise_for_status()
         except requests.RequestException as e:
             return Response({"detail": f"Facebook token exchange failed: {str(e)}"},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        token_data = facebook_res.json()
+        token_data = token_res.json()
         access_token = token_data.get("access_token")
-        
+
         if not access_token:
-            return Response({"detail": "Missing access token from Facebook response"},
+            return Response({"detail": "No access token returned from Facebook"},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # Get user info from Facebook using the access token
+        # 2️⃣ Use access token to fetch user profile
         user_info_url = "https://graph.facebook.com/me"
-        params = {
+        user_params = {
             "fields": "id,name,email,first_name,last_name",
-            "access_token": access_token
+            "access_token": access_token,
         }
 
         try:
-            user_info_res = requests.get(user_info_url, params=params)
+            user_info_res = requests.get(user_info_url, params=user_params)
             user_info_res.raise_for_status()
         except requests.RequestException as e:
-            return Response({"detail": f"Failed to fetch user info from Facebook: {str(e)}"},
+            return Response({"detail": f"Failed to fetch Facebook user info: {str(e)}"},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        user_data = user_info_res.json()
-        
-        # Extract user information
-        facebook_id = user_data.get("id")
-        email = user_data.get("email")
-        name = user_data.get("name", "")
-        first_name = user_data.get("first_name", "")
-        last_name = user_data.get("last_name", "")
-        
+        user_info = user_info_res.json()
+        email = user_info.get("email")
         if not email:
-            return Response({"detail": "Email not provided by Facebook"}, 
+            return Response({"detail": "Facebook account has no email permission granted"},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # Generate username from email
-        username = email.split('@')[0]
-        
-        # Check if user with this email already exists
-        try:
-            user = User.objects.get(email=email)
-            # Update Facebook ID if not set
-            if not user.social_auth.filter(provider='facebook').exists():
-                # If you're using social auth, you might want to create a social auth record
-                # For simplicity, we'll just update the user
-                pass
-                
-        except User.DoesNotExist:
-            # Create new user
-            # Check if username already exists and make it unique if needed
-            base_username = username
-            counter = 1
-            while User.objects.filter(username=username).exists():
-                username = f"{base_username}{counter}"
-                counter += 1
-            
-            user = User.objects.create(
-                username=username,
-                email=email,
-                first_name=first_name,
-                last_name=last_name
-            )
-            user.set_unusable_password()  # Since they're using social auth
-            user.save()
+        first_name = user_info.get("first_name", "")
+        last_name = user_info.get("last_name", "")
+        username = email.split("@")[0]
 
-        # Optional: Update user info if they already exist
-        if user.first_name != first_name or user.last_name != last_name:
+        # 3️⃣ Get or create Django user
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={"username": username, "first_name": first_name, "last_name": last_name}
+        )
+
+        if not created:
             user.first_name = first_name
             user.last_name = last_name
             user.save()
 
-        # Generate JWT tokens (same as your Google view)
+        # 4️⃣ Create JWT tokens
         refresh = RefreshToken.for_user(user)
         access = str(refresh.access_token)
 
