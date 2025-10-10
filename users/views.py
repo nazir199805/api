@@ -103,9 +103,99 @@ class GoogleCodeExchangeView(LoginView, APIView):
 
 
 # Login wuth Facebook View
+# class FacebookLogin(APIView):
+#     def post(self, request, *args, **kwargs):
+#         code = request.data.get("code")
+#         if not code:
+#             return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # 1️⃣ Exchange code for access token
+#         token_url = "https://graph.facebook.com/v19.0/oauth/access_token"
+#         params = {
+#             "client_id": settings.SOCIAL_AUTH_FACEBOOK_KEY,
+#             "redirect_uri": "https://tashya-mendez.onrender.com/auth/facebook/",
+#             "client_secret": settings.SOCIAL_AUTH_FACEBOOK_SECRET,
+#             "code": code,
+#         }
+
+#         try:
+#             token_res = requests.get(token_url, params=params)
+#             token_res.raise_for_status()
+#         except requests.RequestException as e:
+#             return Response({"detail": f"Facebook token exchange failed: {str(e)}"},
+#                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#         token_data = token_res.json()
+#         access_token = token_data.get("access_token")
+
+#         if not access_token:
+#             return Response({"detail": "No access token returned from Facebook"},
+#                             status=status.HTTP_400_BAD_REQUEST)
+
+#         # 2️⃣ Use access token to fetch user profile
+#         user_info_url = "https://graph.facebook.com/me"
+#         user_params = {
+#             "fields": "id,name,email,first_name,last_name",
+#             "access_token": access_token,
+#         }
+
+#         try:
+#             user_info_res = requests.get(user_info_url, params=user_params)
+#             user_info_res.raise_for_status()
+#         except requests.RequestException as e:
+#             return Response({"detail": f"Failed to fetch Facebook user info: {str(e)}"},
+#                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#         user_info = user_info_res.json()
+#         email = user_info.get("email")
+#         if not email:
+#             return Response({"detail": "Facebook account has no email permission granted"},
+#                             status=status.HTTP_400_BAD_REQUEST)
+
+#         first_name = user_info.get("first_name", "")
+#         last_name = user_info.get("last_name", "")
+#         username = email.split("@")[0]
+
+#         # 3️⃣ Get or create Django user
+#         user, created = User.objects.get_or_create(
+#             email=email,
+#             defaults={"username": username, "first_name": first_name, "last_name": last_name}
+#         )
+
+#         if not created:
+#             user.first_name = first_name
+#             user.last_name = last_name
+#             user.save()
+
+#         # 4️⃣ Create JWT tokens
+#         refresh = RefreshToken.for_user(user)
+#         access = str(refresh.access_token)
+
+#         response_data = {
+#             "access": access,
+#             "refresh": str(refresh),
+#             "user": {
+#                 "pk": user.pk,
+#                 "username": user.username,
+#                 "email": user.email,
+#                 "first_name": user.first_name,
+#                 "last_name": user.last_name
+#             },
+#             "role": "admin" if user.is_staff or user.is_superuser else "user"
+#         }
+
+#         return Response(response_data, status=status.HTTP_200_OK)
+
+
+# views.py
+
 class FacebookLogin(APIView):
-    def post(self, request, *args, **kwargs):
-        code = request.data.get("code")
+    """
+    Handles Facebook OAuth code exchange and returns JWT + user info
+    """
+
+    def get(self, request, *args, **kwargs):
+        code = request.query_params.get("code")  # Facebook sends code as GET
         if not code:
             return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -113,7 +203,7 @@ class FacebookLogin(APIView):
         token_url = "https://graph.facebook.com/v19.0/oauth/access_token"
         params = {
             "client_id": settings.SOCIAL_AUTH_FACEBOOK_KEY,
-            "redirect_uri": "https://tashya-mendez.onrender.com/auth/facebook/",
+            "redirect_uri": "https://tashya-mendez.onrender.com/auth/facebook/",  # Must match login redirect
             "client_secret": settings.SOCIAL_AUTH_FACEBOOK_SECRET,
             "code": code,
         }
@@ -125,19 +215,14 @@ class FacebookLogin(APIView):
             return Response({"detail": f"Facebook token exchange failed: {str(e)}"},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        token_data = token_res.json()
-        access_token = token_data.get("access_token")
-
+        access_token = token_res.json().get("access_token")
         if not access_token:
             return Response({"detail": "No access token returned from Facebook"},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # 2️⃣ Use access token to fetch user profile
+        # 2️⃣ Fetch user profile
         user_info_url = "https://graph.facebook.com/me"
-        user_params = {
-            "fields": "id,name,email,first_name,last_name",
-            "access_token": access_token,
-        }
+        user_params = {"fields": "id,name,email,first_name,last_name", "access_token": access_token}
 
         try:
             user_info_res = requests.get(user_info_url, params=user_params)
@@ -149,8 +234,7 @@ class FacebookLogin(APIView):
         user_info = user_info_res.json()
         email = user_info.get("email")
         if not email:
-            return Response({"detail": "Facebook account has no email permission granted"},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Facebook account has no email permission granted"}, status=400)
 
         first_name = user_info.get("first_name", "")
         last_name = user_info.get("last_name", "")
@@ -185,8 +269,6 @@ class FacebookLogin(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
-
-
 
 
 
