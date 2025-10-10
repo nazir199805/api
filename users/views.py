@@ -3,49 +3,28 @@ from rest_framework.views import APIView
 from .models import Api, offer, HeroImage,  Category,  Product, Favorite, Cart, Notification, Order
 from .serializers import  OfferSerializer, HeroImageSerializer, ApiSerializer, ProductSerializer, FavoriteSerializer, CartSerializer, NotificationSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView, LoginView
 from rest_framework import status
 from .serializers import OrderSerializer
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from rest_framework.decorators import action
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 import requests
-from dj_rest_auth.jwt_auth import set_jwt_access_cookie, set_jwt_refresh_cookie
 from django.contrib.auth import get_user_model
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from django.conf import settings
 User = get_user_model()
 
 
 
-class FacebookLogin(SocialLoginView):
-    adapter_class = FacebookOAuth2Adapter
 
 
-
-
-
-
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from dj_rest_auth.views import LoginView
-from rest_framework_simplejwt.tokens import RefreshToken
-from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
-from django.conf import settings
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
+#Login with Google View
 class GoogleCodeExchangeView(LoginView, APIView):
     def post(self, request, *args, **kwargs):
         code = request.data.get('code')
@@ -118,6 +97,120 @@ class GoogleCodeExchangeView(LoginView, APIView):
         "role": "admin" if user.is_staff or user.is_superuser else "user"
 }
 
+
+        return Response(response_data, status=status.HTTP_200_OK)
+    
+
+
+# Login wuth Facebook View
+class FacebookLogin(APIView):
+    def post(self, request, *args, **kwargs):
+        code = request.data.get('code')
+        if not code:
+            return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Exchange code for access token with Facebook
+        token_url = "https://graph.facebook.com/v12.0/oauth/access_token"
+        payload = {
+            "code": code,
+            "client_id": settings.SOCIAL_AUTH_FACEBOOK_KEY,  # Your Facebook App ID
+            "client_secret": settings.SOCIAL_AUTH_FACEBOOK_SECRET,  # Your Facebook App Secret
+            "redirect_uri":  "http://localhost:3000",
+        }
+
+        try:
+            facebook_res = requests.post(token_url, data=payload)
+            facebook_res.raise_for_status()
+        except requests.RequestException as e:
+            return Response({"detail": f"Facebook token exchange failed: {str(e)}"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        token_data = facebook_res.json()
+        access_token = token_data.get("access_token")
+        
+        if not access_token:
+            return Response({"detail": "Missing access token from Facebook response"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Get user info from Facebook using the access token
+        user_info_url = "https://graph.facebook.com/me"
+        params = {
+            "fields": "id,name,email,first_name,last_name",
+            "access_token": access_token
+        }
+
+        try:
+            user_info_res = requests.get(user_info_url, params=params)
+            user_info_res.raise_for_status()
+        except requests.RequestException as e:
+            return Response({"detail": f"Failed to fetch user info from Facebook: {str(e)}"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        user_data = user_info_res.json()
+        
+        # Extract user information
+        facebook_id = user_data.get("id")
+        email = user_data.get("email")
+        name = user_data.get("name", "")
+        first_name = user_data.get("first_name", "")
+        last_name = user_data.get("last_name", "")
+        
+        if not email:
+            return Response({"detail": "Email not provided by Facebook"}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Generate username from email
+        username = email.split('@')[0]
+        
+        # Check if user with this email already exists
+        try:
+            user = User.objects.get(email=email)
+            # Update Facebook ID if not set
+            if not user.social_auth.filter(provider='facebook').exists():
+                # If you're using social auth, you might want to create a social auth record
+                # For simplicity, we'll just update the user
+                pass
+                
+        except User.DoesNotExist:
+            # Create new user
+            # Check if username already exists and make it unique if needed
+            base_username = username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+            
+            user = User.objects.create(
+                username=username,
+                email=email,
+                first_name=first_name,
+                last_name=last_name
+            )
+            user.set_unusable_password()  # Since they're using social auth
+            user.save()
+
+        # Optional: Update user info if they already exist
+        if user.first_name != first_name or user.last_name != last_name:
+            user.first_name = first_name
+            user.last_name = last_name
+            user.save()
+
+        # Generate JWT tokens (same as your Google view)
+        refresh = RefreshToken.for_user(user)
+        access = str(refresh.access_token)
+
+        response_data = {
+            "access": access,
+            "refresh": str(refresh),
+            "user": {
+                "pk": user.pk,
+                "username": user.username,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name
+            },
+            "role": "admin" if user.is_staff or user.is_superuser else "user"
+        }
 
         return Response(response_data, status=status.HTTP_200_OK)
 
