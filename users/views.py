@@ -114,7 +114,7 @@ class FacebookLogin(APIView):
         params = {
             "client_id": settings.SOCIAL_AUTH_FACEBOOK_KEY,
             "redirect_uri": "https://tashya-mendez.onrender.com/auth/facebook/callback/",
-            "client_secret": settings.FSOCIAL_AUTH_FACEBOOK_SECRET,
+            "client_secret": settings.SOCIAL_AUTH_FACEBOOK_SECRET,
             "code": code,
         }
 
