@@ -114,7 +114,7 @@ class FacebookLogin(APIView):
         params = {
             "client_id": settings.SOCIAL_AUTH_FACEBOOK_KEY,
             "client_secret": settings.SOCIAL_AUTH_FACEBOOK_SECRET,
-            "redirect_uri": "https://localhost:3000",
+            "redirect_uri": "https://localhost:3000/",
             "code": code,
         }
 
