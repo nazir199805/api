@@ -113,8 +113,8 @@ class FacebookLogin(APIView):
         token_url = "https://graph.facebook.com/v19.0/oauth/access_token"
         params = {
             "client_id": settings.SOCIAL_AUTH_FACEBOOK_KEY,
-            "redirect_uri": "https://tashya-mendez.onrender.com/auth/facebook/",
             "client_secret": settings.SOCIAL_AUTH_FACEBOOK_SECRET,
+            "redirect_uri": "https://localhost:3000",
             "code": code,
         }
 
