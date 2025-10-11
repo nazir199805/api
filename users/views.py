@@ -318,13 +318,56 @@ class UserOrderViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 
+from rest_framework.decorators import api_view
+from .paypal_utils import get_paypal_access_token
+
+
+@api_view(["POST"])
+def create_paypal_order(request):
+    amount = request.data.get("amount", "10.00")  # USD, dynamic
+    token = get_paypal_access_token()
+
+    url = f"{settings.PAYPAL_BASE_URL}/v2/checkout/orders"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}",
+    }
+    data = {
+        "intent": "CAPTURE",
+        "purchase_units": [{"amount": {"currency_code": "USD", "value": amount}}],
+        "application_context": {"return_url": "http://localhost:3000/", "cancel_url": "http://localhost:3000/"},
+    }
+
+    res = requests.post(url, json=data, headers=headers)
+    res.raise_for_status()
+    return Response(res.json())
+
+
+
+
+@api_view(["POST"])
+def capture_paypal_order(request):
+    order_id = request.data.get("orderID")
+    if not order_id:
+        return Response({"detail": "No orderID provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+    token = get_paypal_access_token()
+    url = f"{settings.PAYPAL_BASE_URL}/v2/checkout/orders/{order_id}/capture"
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
+
+    res = requests.post(url, headers=headers)
+    res.raise_for_status()
+    return Response(res.json())
+
+
+
+
+
+
+
+
+
 from .models import Product, Order, Notification, Favorite, offer, User
-
-
-
-
-
-
 
 
 def dashboard_callback(request, context):

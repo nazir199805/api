@@ -185,6 +185,11 @@ GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('FACEBOOK_CLIENT_ID')
 SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_CLIENT_SECRET')
 
+PAYPAL_CLIENT_ID = os.environ.get("YOUR_PAYPAL_CLIENT_ID")
+PAYPAL_SECRET = os.environ.get("YOUR_PAYPAL_SECRET")
+PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com" 
+
+
 
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
