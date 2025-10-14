@@ -19,10 +19,10 @@ SECRET_KEY = 'django-insecure-%sgu-!itv9-q^qtel#c1#9n)u(%d1-i@gsbv$ab_bi@(@up!0f
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'https://react-chi-peach.vercel.app',
     'tashya-mendez.onrender.com',
     'localhost',
     '127.0.0.1',
-    'https://react-chi-peach.vercel.app',
 ]
 
 
@@ -98,8 +98,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     
-    'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -138,10 +138,10 @@ WSGI_APPLICATION = 'Api.wsgi.application'
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
+    'https://react-chi-peach.vercel.app',  
     'https://tashya-mendez.onrender.com',
     'http://localhost:3000',  
     'http://localhost:5173',
-    'https://react-chi-peach.vercel.app',  
 ]
 
 CSRF_COOKIE_HTTPONLY = False
@@ -158,23 +158,15 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 
 
 
-# SOCIALACCOUNT_PROVIDERS = {
-#     'google': {
-#         'APP': {
-#             'client_id': os.environ.get('GOOGLE_CLIENT_ID'),
-#             'secret': os.environ.get('GOOGLE_SECRET'),
-#             'key': ''
-#         }
-#     }
-# }
+
 
 
 CSRF_TRUSTED_ORIGINS = [
+    'https://react-chi-peach.vercel.app',
     "https://localhost:3000",
     "https://tashya-mendez.onrender.com",
     'https://127.0.0.1',
-    'http://localhost:5173,'
-    'https://react-chi-peach.vercel.app',
+    'http://localhost:5173',
 
 ]
 
