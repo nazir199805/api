@@ -21,7 +21,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'tashya-mendez.onrender.com',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
+    'https://react-chi-peach.vercel.app',
 ]
 
 
@@ -139,7 +140,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'https://tashya-mendez.onrender.com',
     'http://localhost:3000',  
-    'http://localhost:5173',  
+    'http://localhost:5173',
+    'https://react-chi-peach.vercel.app',  
 ]
 
 CSRF_COOKIE_HTTPONLY = False
@@ -171,7 +173,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://localhost:3000",
     "https://tashya-mendez.onrender.com",
     'https://127.0.0.1',
-    'http://localhost:5173/,'
+    'http://localhost:5173,'
+    'https://react-chi-peach.vercel.app',
 
 ]
 
