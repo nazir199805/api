@@ -137,12 +137,14 @@ WSGI_APPLICATION = 'Api.wsgi.application'
 
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    'https://react-chi-peach.vercel.app',  
-    'https://tashya-mendez.onrender.com',
-    'http://localhost:3000',  
-    'http://localhost:5173',
-]
+CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS_ALLOWED_ORIGINS = [
+#     'https://react-chi-peach.vercel.app',  
+#     'https://tashya-mendez.onrender.com',
+#     'http://localhost:3000',  
+#     'http://localhost:5173',
+# ]
 
 
 CORS_ALLOW_HEADERS = [
@@ -177,7 +179,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 
 CSRF_TRUSTED_ORIGINS = [
     'https://react-chi-peach.vercel.app',
-    "https://localhost:3000",
+    "https://localhost",
     "https://tashya-mendez.onrender.com",
     'https://127.0.0.1',
     'http://localhost:5173',

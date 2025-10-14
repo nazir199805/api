@@ -229,18 +229,18 @@ class CartViewSet(viewsets.ModelViewSet):
 class ApiViewSet(viewsets.ModelViewSet):
     queryset = Api.objects.all()
     serializer_class = ApiSerializer
-    permission_classes = [AllowAny]
+    
 
 
 class OfferViewSet(viewsets.ModelViewSet):
     queryset = offer.objects.all()
     serializer_class = OfferSerializer
-    permission_classes = [AllowAny]
+    
 
 class HeroImageViewSet(viewsets.ModelViewSet):
     queryset = HeroImage.objects.filter(is_active=True).order_by('order')
     serializer_class = HeroImageSerializer
-    permission_classes = [AllowAny]
+   
 
 
 
