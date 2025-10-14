@@ -19,7 +19,7 @@ SECRET_KEY = 'django-insecure-%sgu-!itv9-q^qtel#c1#9n)u(%d1-i@gsbv$ab_bi@(@up!0f
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'https://react-chi-peach.vercel.app',
+    'react-chi-peach.vercel.app',
     'tashya-mendez.onrender.com',
     'localhost',
     '127.0.0.1',
@@ -135,7 +135,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Api.wsgi.application'
 
-CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'https://react-chi-peach.vercel.app',  
@@ -143,6 +143,20 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',  
     'http://localhost:5173',
 ]
+
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
 
 CSRF_COOKIE_HTTPONLY = False
 
@@ -170,7 +184,6 @@ CSRF_TRUSTED_ORIGINS = [
 
 ]
 
-CSRF_COOKIE_HTTPONLY = False  
 
 
 
