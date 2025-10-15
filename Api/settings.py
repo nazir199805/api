@@ -208,7 +208,8 @@ EMAIL_HOST_USER = 'resetdjango8@gmail.com'
 EMAIL_HOST_PASSWORD = 'lkbv usgq snba mziv'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'Test' 
+DEFAULT_FROM_EMAIL = 'resetdjango8@gmail.com' 
+
 
 ACCOUNT_LOGIN_METHODS = ["email"]
 
