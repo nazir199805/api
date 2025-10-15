@@ -4,7 +4,7 @@ from unfold.admin import ModelAdmin
 from image_uploader_widget.admin import ImageUploaderInline
 from image_uploader_widget.widgets import ImageUploaderWidget
 from django.db import models
-from .models import Product, Favorite, Cart, CartItem, Notification,Order, OrderItem, Brand
+from .models import Product, Favorite, Cart, CartItem, Notification,Order, OrderItem, Brand, Section
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
@@ -30,7 +30,18 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 class GroupAdmin(BaseGroupAdmin, ModelAdmin):
     pass
 
-
+@admin.register(Section)
+class SectionAdmin(ModelAdmin):
+    list_display = ("name", "is_active", "filter_summary")
+    list_filter = ("is_active",)
+    search_fields = ("name", "description")
+    ordering = ("name",)
+  
+    def filter_summary(self, obj):
+        if isinstance(obj.filter_by, dict):
+            return ", ".join([f"{k}: {v}" for k, v in obj.filter_by.items()])
+        return obj.filter_by
+    filter_summary.short_description = "Filter Details"
 
 
 

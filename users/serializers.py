@@ -1,12 +1,22 @@
 from rest_framework import serializers
-from .models import Api, offer, HeroImage, HeroButton, Category, Profile, Product, ProductImage, Notification
+from .models import Api, offer, HeroImage, HeroButton,Section, Category, Profile, Product, ProductImage, Notification
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from taggit.serializers import (TagListSerializerField, TaggitSerializer)
 from dj_rest_auth.serializers import LoginSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Order, OrderItem
 
-
+class SectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Section
+        fields = [
+            "id",
+            "name",
+            "description",
+            "image",
+            "is_active",
+            "filter_by",  
+        ]
 
 class CustomLoginSerializer(LoginSerializer):
     username = None
