@@ -9,7 +9,7 @@ from .serializers import OrderSerializer
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
-from dj_rest_auth.registration.views import SocialLoginView
+from dj_rest_auth.registration.views import RegisterView
 from rest_framework.decorators import action
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 import requests
@@ -20,8 +20,25 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from django.conf import settings
 User = get_user_model()
 
+class RegisterViewEmail(RegisterView):
+    def create(self, request, *args, **kwargs):
+        email = request.data.get('email', '').lower().strip()
 
+        # Check if email already exists
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {"error": "Email already in use"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        # Otherwise, proceed with normal registration
+        return super().create(request, *args, **kwargs)
+
+    def get_response(self):
+        response = super().get_response()
+        # You can modify the successful response here if needed
+        response.data['message'] = "User registered successfully"
+        return response
 
 
 #Login with Google View

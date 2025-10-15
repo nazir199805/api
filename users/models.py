@@ -7,14 +7,6 @@ from django.contrib.auth.models import User
 
 
 
-
-CATEGORY = (
-    ("women", "Women"),
-    ("men", "Men"),
-    ("kids", "Kids")
-)
-
-
 class Brand(models.Model):
     name = models.CharField(max_length=255, unique=True)
     logo = models.ImageField(upload_to='brands/', blank=True, null=True)
@@ -24,6 +16,12 @@ class Brand(models.Model):
 
 
 class Category(models.Model):
+    CATEGORY = (
+    ("women", "Women"),
+    ("men", "Men"),
+    ("kids", "Kids")
+    )
+
     name = models.CharField(max_length=300, choices=CATEGORY)
 
     def __str__(self):

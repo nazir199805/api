@@ -7,7 +7,7 @@ from users.serializers import CustomRegisterSerializer
 from users.views import CustomLoginView
 from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
-from users.views import  FacebookLogin, GoogleCodeExchangeView, capture_paypal_order, create_paypal_order
+from users.views import  FacebookLogin,RegisterViewEmail ,GoogleCodeExchangeView, capture_paypal_order, create_paypal_order
 
 
 urlpatterns = [
@@ -23,7 +23,7 @@ urlpatterns = [
     
     path('auth/register/', include('dj_rest_auth.registration.urls')),  # Sign up
     # path('auth/google/', include('allauth.socialaccount.providers.google.urls')),
-    path('auth/registration/', RegisterView.as_view(serializer_class=CustomRegisterSerializer)),
+    path('auth/registration/', RegisterViewEmail.as_view(serializer_class=CustomRegisterSerializer)),
     path("i18n/", include("django.conf.urls.i18n")),
     path("create-paypal-order/", create_paypal_order, name="create_paypal_order"),
     path("capture-paypal-order/",capture_paypal_order, name="capture_paypal_order"),
