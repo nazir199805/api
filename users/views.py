@@ -37,7 +37,7 @@ class GoogleCodeExchangeView(LoginView, APIView):
             "code": code,
             "client_id": settings.GOOGLE_CLIENT_ID,
             "client_secret": settings.GOOGLE_CLIENT_SECRET,
-            "redirect_uri": "http://localhost:3000",
+            "redirect_uri": "https://aboutyouwebsite.vercel.app/callback/",
             "grant_type": "authorization_code",
         }
 
