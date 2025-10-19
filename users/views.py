@@ -388,7 +388,7 @@ def capture_paypal_order(request):
 from .models import Product, Order, Notification, Favorite, offer, User
 
 
-def dashboard_callback(request, context):
+def dashboard_callback(request,context):
     """
     Unfold expects us to receive a context dict, update it and return it.
     Don't call render() here.
@@ -432,7 +432,7 @@ def dashboard_callback(request, context):
         },
        
     ]
-    recent_products = Product.objects.all()[:5]  # adjust field if needed
+    recent_products = Product.objects.all().order_by('-id')[:5]  # adjust field if needed
 
     # Build table data
     table_data = {

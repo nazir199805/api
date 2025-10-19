@@ -95,6 +95,8 @@ admin.site.register(Notification, NotificationAdmin)
 
 
 class HeroImageAdmin(ModelAdmin):
+    list_display = ['title','order', 'is_active']
+    list_editable = ['order','is_active']
     formfield_overrides = {
         models.ImageField: {'widget': ImageUploaderWidget},
     }
