@@ -23,6 +23,7 @@ ALLOWED_HOSTS = [
     'tashya-mendez.onrender.com',
     'localhost',
     '127.0.0.1',
+    'https://api-8mh1.onrender.com',
 ]
 
 
