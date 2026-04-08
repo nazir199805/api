@@ -18,13 +18,7 @@ SECRET_KEY = 'django-insecure-%sgu-!itv9-q^qtel#c1#9n)u(%d1-i@gsbv$ab_bi@(@up!0f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'react-chi-peach.vercel.app',
-    'tashya-mendez.onrender.com',
-    'localhost',
-    '127.0.0.1',
-    'https://api-8mh1.onrender.com',
-]
+ALLOWED_HOSTS = ["*"]
 
 
 
