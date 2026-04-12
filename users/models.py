@@ -32,7 +32,7 @@ class Category(models.Model):
     ("kids", "Kids")
     )
 
-    name = models.CharField(max_length=300, choices=CATEGORY)
+    name = models.CharField(max_length=300,)
 
     def __str__(self):
         return self.name

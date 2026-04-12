@@ -33,6 +33,7 @@ class GroupAdmin(BaseGroupAdmin, ModelAdmin):
 @admin.register(Section)
 class SectionAdmin(ModelAdmin):
     list_display = ("name", "is_active", "filter_summary")
+    list_editable = ("is_active",)
     list_filter = ("is_active",)
     search_fields = ("name", "description")
     ordering = ("name",)
