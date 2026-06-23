@@ -18,6 +18,40 @@ from google.auth.transport import requests as google_requests
 from django.conf import settings
 User = get_user_model()
 
+
+class ToggleFavoriteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        product_id = request.data.get("product_id")
+
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({"error": "Product not found"}, status=404)
+
+        favorite = Favorite.objects.filter(
+            user=request.user,
+            product=product
+        ).first()
+
+        if favorite:
+            favorite.delete()
+            return Response({
+                "favorite": False,
+                "message": "Removed from favorites"
+            })
+
+        Favorite.objects.create(
+            user=request.user,
+            product=product
+        )
+
+        return Response({
+            "favorite": True,
+            "message": "Added to favorites"
+        })
+
 class RegisterViewEmail(RegisterView):
     def create(self, request, *args, **kwargs):
         email = request.data.get('email', '').lower().strip()
@@ -124,7 +158,7 @@ class FacebookLogin(APIView):
         if not code:
             return Response({"detail": "No code provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 1️⃣ Exchange code for access token
+        # Exchange code for access token
         token_url = "https://graph.facebook.com/v19.0/oauth/access_token"
         params = {
             "client_id": settings.SOCIAL_AUTH_FACEBOOK_KEY,
@@ -147,7 +181,7 @@ class FacebookLogin(APIView):
             return Response({"detail": "No access token returned from Facebook"},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # 2️⃣ Use access token to fetch user profile
+        # Use access token to fetch user profile
         user_info_url = "https://graph.facebook.com/me"
         user_params = {
             "fields": "id,name,email,first_name,last_name",
@@ -171,7 +205,7 @@ class FacebookLogin(APIView):
         last_name = user_info.get("last_name", "")
         username = email.split("@")[0]
 
-        # 3️⃣ Get or create Django user
+        # Get or create Django user
         user, created = User.objects.get_or_create(
             email=email,
             defaults={"username": username, "first_name": first_name, "last_name": last_name}
@@ -182,7 +216,7 @@ class FacebookLogin(APIView):
             user.last_name = last_name
             user.save()
 
-        # 4️⃣ Create JWT tokens
+        # Create JWT tokens
         refresh = RefreshToken.for_user(user)
         access = str(refresh.access_token)
 
@@ -224,12 +258,14 @@ class CustomLoginView(LoginView):
 
 
 class FavoriteViewSet(viewsets.ModelViewSet):
-    queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
+    queryset = Favorite.objects.all()
+
+    def get_queryset(self):
+        return Favorite.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)  
-
+        serializer.save(user=self.request.user)
 
 
 class CartViewSet(viewsets.ModelViewSet):

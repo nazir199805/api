@@ -5,6 +5,14 @@ from taggit.serializers import (TagListSerializerField, TaggitSerializer)
 from dj_rest_auth.serializers import LoginSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Order, OrderItem
+from .models import Favorite
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+
+    class Meta:
+        model = Favorite
+        fields = ['id', 'product', 'product_name', 'created_at']
 
 class SectionSerializer(serializers.ModelSerializer):
     class Meta:
