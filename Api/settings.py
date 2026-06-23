@@ -62,6 +62,8 @@ INSTALLED_APPS = [
     "admin_dashboard.apps.AdminDashboardConfig",
     'unfold.contrib.import_export',
     'django.contrib.admin',
+    'cloudinary',
+    'cloudinary_storage',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -125,7 +127,20 @@ TEMPLATES = [
     },
 ]
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dz5f84b93',
+    'API_KEY': '582624146413474',
+    'API_SECRET':os.getenv('CLOUDINARY_API_SECRET'),
+}
 
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 WSGI_APPLICATION = 'Api.wsgi.application'
 

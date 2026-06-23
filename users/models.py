@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 class Section(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='sections/', blank=True, null=True)
+    image = models.ImageField(upload_to='sections', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     filter_by = models.JSONField(blank=True, null=True)
 
@@ -19,7 +19,7 @@ class Section(models.Model):
 
 class Brand(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    logo = models.ImageField(upload_to='brands/', blank=True, null=True)
+    logo = models.ImageField(upload_to='brands', blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -147,7 +147,7 @@ class offer(models.Model):
 
 
 class HeroImage(models.Model):
-    image = models.ImageField(upload_to='hero/')
+    image = models.ImageField(upload_to='hero')
     title = models.CharField(max_length=255, blank=True)
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
