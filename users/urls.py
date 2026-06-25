@@ -14,6 +14,7 @@ router.register(r'sections', views.SectionViewSet)
 
 
 urlpatterns = [
+    path("products/search/", views.ProductSearchView.as_view()),
     path('', include(router.urls)),
     path('token', TokenObtainPairView.as_view()),
     path('token/refresh', TokenRefreshView.as_view()),

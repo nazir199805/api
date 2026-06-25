@@ -19,6 +19,18 @@ from django.conf import settings
 User = get_user_model()
 
 
+class ProductSearchView(APIView):
+    def get(self, request):
+        query = request.GET.get("q", "")
+
+        products = Product.objects.filter(
+            name__icontains=query
+        )
+
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+    
+
 class ToggleFavoriteView(APIView):
     permission_classes = [IsAuthenticated]
 
