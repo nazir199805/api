@@ -51,7 +51,7 @@ class ProductImagesTab(ImageUploaderInline):
 
 
 class ProductAdmin(ModelAdmin):
-    list_display = ('name', 'price',) 
+    list_display = ('name', 'price','category') 
     search_fields = ('name', 'category__name')  # Fields to search
     # list_filter = ('category',)  # Add filters in the admin panel
     inlines = [ProductImagesTab]

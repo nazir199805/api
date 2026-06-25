@@ -27,12 +27,14 @@ class Brand(models.Model):
 
 class Category(models.Model):
     CATEGORY = (
-    ("women", "Women"),
-    ("men", "Men"),
-    ("kids", "Kids")
+    ("Office", "Office"),
+    ("Luxry", "Luxry"),
+    ("Home", "Home"),
+    ("Carpet", "Carpet"),
+    ("Rug", "Rug"),
     )
 
-    name = models.CharField(max_length=300,)
+    name = models.CharField(max_length=300,choices=CATEGORY)
 
     def __str__(self):
         return self.name
