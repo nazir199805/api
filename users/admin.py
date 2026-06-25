@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import Api, offer, HeroImage, HeroButton, Category, Profile, Product, ProductImage
+from .models import Api, HeroImage, HeroButton, Category, Profile, Product, ProductImage
 from unfold.admin import ModelAdmin
 from image_uploader_widget.admin import ImageUploaderInline
 from image_uploader_widget.widgets import ImageUploaderWidget
 from django.db import models
-from .models import Product, Favorite, Cart, CartItem, Notification,Order, OrderItem, Brand, Section
+from .models import Product, Favorite, Cart, CartItem, Order, OrderItem, Brand, Section
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
@@ -51,9 +51,9 @@ class ProductImagesTab(ImageUploaderInline):
 
 
 class ProductAdmin(ModelAdmin):
-    list_display = ('name', 'price', 'category',) 
+    list_display = ('name', 'price',) 
     search_fields = ('name', 'category__name')  # Fields to search
-    list_filter = ('category',)  # Add filters in the admin panel
+    # list_filter = ('category',)  # Add filters in the admin panel
     inlines = [ProductImagesTab]
 
 
@@ -86,12 +86,6 @@ class CartItemAdmin(ModelAdmin):
 admin.site.register(CartItem, CartItemAdmin)
 
 
-class NotificationAdmin(ModelAdmin):
-    list_display = ('user', 'message', 'is_read', 'created_at')
-    list_filter = ('is_read',)
-    search_fields = ('message',)
-
-admin.site.register(Notification, NotificationAdmin)
 
 
 
@@ -122,8 +116,6 @@ class CaatagoryAdmin(ModelAdmin):
 class ButtonAdmin(ModelAdmin):
     pass
 
-class OfferAdmin(ModelAdmin):
-    pass
 
 class OrderAdmin(ModelAdmin, ImportExportModelAdmin):
     list_display = ['user', 'status', 'total_amount']
@@ -139,7 +131,6 @@ class BrandAdmin(ModelAdmin):
 
 admin.site.register(Api)
 admin.site.register(Brand, BrandAdmin)
-admin.site.register(offer, OfferAdmin)
 admin.site.register(HeroImage, HeroImageAdmin)
 # admin.site.register(HeroButton)
 admin.site.register(Category, CaatagoryAdmin)

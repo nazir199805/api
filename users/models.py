@@ -41,7 +41,7 @@ class Category(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=300)
     price = models.DecimalField(max_digits=10,decimal_places=2)
-    color = models.CharField(max_length=300, null=True, blank=True)
+    # color = models.CharField(max_length=300, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     tags = TaggableManager(blank=True)
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
@@ -88,26 +88,6 @@ class Favorite(models.Model):
         return f"{self.product.name} marked as favorite by {self.user.username}"
 
 
-
-class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
-    message = models.TextField()  
-    created_at = models.DateTimeField(auto_now_add=True)  
-    is_read = models.BooleanField(default=False)  # To track if the user has read the notification
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
-
-    def __str__(self):
-        return f"Notification for {self.user.username} - {'Read' if self.is_read else 'Unread'}"
-
-    def mark_as_read(self):
-        self.is_read = True
-        self.save()
-
-
-
-
-
-
 class Profile(models.Model):
     GENDER_CHOICES = (
         ('male', 'Male'),
@@ -138,11 +118,6 @@ class Api(models.Model):
     def __str__(self):
       return f'Hero Api'
     
-
-  
-class offer(models.Model):
-   timer = models.IntegerField()
-   offer = models.IntegerField(null=True, blank=True)
 
 
 

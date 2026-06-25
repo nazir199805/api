@@ -72,7 +72,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'users',
     'rest_framework',
-    # 'rest_framework.authtoken',
     'corsheaders',
     'dj_rest_auth',
     'rest_framework.authtoken',
@@ -80,7 +79,6 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'dj_rest_auth.registration',
-    # 'social_django',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
@@ -130,7 +128,7 @@ TEMPLATES = [
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dz5f84b93',
     'API_KEY': '582624146413474',
-    'API_SECRET':os.getenv('CLOUDINARY_API_SECRET'),
+    'API_SECRET':"_86w2oWZTnRhj0p_zlqakWQvm8E",
 }
 
 STORAGES = {
@@ -440,11 +438,7 @@ UNFOLD = {
                         "icon": "person",
                         "link": reverse_lazy("admin:users_profile_changelist"),
                     },
-                    {
-                        "title": _("Notifications"),
-                        "icon": "notifications",
-                        "link": reverse_lazy("admin:users_notification_changelist"),
-                    },
+                   
                 ],
             },
             {
@@ -511,11 +505,7 @@ UNFOLD = {
                         "icon": "code",
                         "link": reverse_lazy("admin:users_api_changelist"),
                     },
-                    {
-                        "title": _("Offers"),
-                        "icon": "local_offer",
-                        "link": reverse_lazy("admin:users_offer_changelist"),
-                    },
+                 
                 ],
             },
             

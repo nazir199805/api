@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Api, offer, HeroImage, HeroButton,Section, Category, Profile, Product, ProductImage, Notification
+from .models import Api, HeroImage, HeroButton,Section, Category, Profile, Product, ProductImage
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from taggit.serializers import (TagListSerializerField, TaggitSerializer)
 from dj_rest_auth.serializers import LoginSerializer
@@ -98,10 +98,6 @@ class ApiSerializer(serializers.ModelSerializer):
 
 
 
-class OfferSerializer(serializers.ModelSerializer):
-  class Meta:
-    model = offer
-    fields = '__all__'
 
 class ProductImageSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(use_url=True)
@@ -136,7 +132,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'price', 'color', 'category','brand', 'tags', 'is_favorited','sub_images',]
+        fields = ['id', 'name', 'price', 'category','brand', 'tags', 'is_favorited','sub_images',]
 
     def get_is_favorited(self, obj):
         user = self.context.get('user')  
@@ -172,24 +168,7 @@ class CartSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'user_username', 'is_active', 'items']
         read_only_fields = ['user']
 
-
-class NotificationSerializer(serializers.ModelSerializer):
-    user_username = serializers.CharField(source='user.username', read_only=True)  # To show the username of the user who received the notification
-    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)  # Format the datetime
-    is_read = serializers.BooleanField()  # Include is_read field to show if the notification is read
-
-    class Meta:
-        model = Notification
-        fields = ['id', 'user', 'user_username', 'message', 'created_at', 'is_read']
-        read_only_fields = ['user', 'created_at']  # Prevent changes to 'user' and 'created_at' from external requests
     
-    def update(self, instance, validated_data):
-        """Override the update method to handle the 'mark_as_read' logic."""
-        instance.is_read = validated_data.get('is_read', instance.is_read)
-        instance.save()
-        return instance
-    
-
 
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:

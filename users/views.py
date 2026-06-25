@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from .models import Api, offer, HeroImage,  Category, Section,  Product, Favorite, Cart, Notification, Order
-from .serializers import  OfferSerializer, HeroImageSerializer,SectionSerializer ,ApiSerializer, ProductSerializer, FavoriteSerializer, CartSerializer, NotificationSerializer
+from .models import Api, HeroImage,  Category, Section,  Product, Favorite, Cart, Order
+from .serializers import HeroImageSerializer,SectionSerializer ,ApiSerializer, ProductSerializer, FavoriteSerializer, CartSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from dj_rest_auth.registration.views import LoginView
 from rest_framework import status
@@ -286,10 +286,6 @@ class ApiViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
 
-class OfferViewSet(viewsets.ModelViewSet):
-    queryset = offer.objects.all()
-    serializer_class = OfferSerializer
-    permission_classes = [AllowAny]
 
 class HeroImageViewSet(viewsets.ModelViewSet):
     queryset = HeroImage.objects.filter(is_active=True).order_by('order')
@@ -332,33 +328,6 @@ class FilterProductView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-
-
-
-
-class NotificationViewSet(viewsets.ModelViewSet):
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        # Filter notifications by the current user
-        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
-
-    @action(detail=True, methods=['patch'])
-    def mark_as_read(self, request, pk=None):
-        # Mark a specific notification as read
-        try:
-            notification = Notification.objects.get(id=pk, user=request.user)
-        except Notification.DoesNotExist:
-            return Response({"detail": "Notification not found."}, status=status.HTTP_404_NOT_FOUND)
-        
-        notification.is_read = True
-        notification.save()
-        
-        serializer = self.get_serializer(notification)
-        return Response(serializer.data)
 
 
 
@@ -421,7 +390,7 @@ def capture_paypal_order(request):
 
 
 
-from .models import Product, Order, Notification, Favorite, offer, User
+from .models import Product, Order, Favorite, User
 
 
 def dashboard_callback(request,context):
@@ -460,21 +429,15 @@ def dashboard_callback(request,context):
             "link": "admin:users_favorite_changelist",
             "icon": "favorite",
         },
-        {
-            "title": "Unread Notifications",
-            "metric": Notification.objects.filter(is_read=False).count(),
-            "link": "admin:users_notification_changelist",
-            "icon": "notifications",
-        },
-       
+
     ]
     recent_products = Product.objects.all().order_by('-id')[:5]  # adjust field if needed
 
     # Build table data
     table_data = {
-        "headers": ["Name", "Price", "Brand", "Category", "Color"],
+        "headers": ["Name", "Price", "Brand", "Category"],
         "rows": [
-            [p.name, f"${p.price}", p.brand, p.category, p.color]
+            [p.name, f"${p.price}", p.brand, p.category]
             for p in recent_products
         ]
     }
