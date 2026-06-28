@@ -1,16 +1,14 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from .models import Api, HeroImage,  Category, Section,  Product, Favorite, Cart, Order
 from .serializers import HeroImageSerializer,SectionSerializer ,ApiSerializer, ProductSerializer, FavoriteSerializer, CartSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from dj_rest_auth.registration.views import LoginView
-from rest_framework import status
 from .serializers import OrderSerializer
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 from dj_rest_auth.registration.views import RegisterView
-from rest_framework.decorators import action
 import requests
 from django.contrib.auth import get_user_model
 from google.oauth2 import id_token
