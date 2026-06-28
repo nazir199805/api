@@ -30,8 +30,8 @@ class Category(models.Model):
     ("Office", "Office"),
     ("Luxry", "Luxry"),
     ("Home", "Home"),
-    ("Carpet", "Carpet"),
-    ("Rug", "Rug"),
+    ("Carpets", "Carpets"),
+    ("Rugs", "Rugs"),
     )
 
     name = models.CharField(max_length=300,choices=CATEGORY)
