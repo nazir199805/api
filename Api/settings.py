@@ -33,6 +33,7 @@ REST_FRAMEWORK = {
 }
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
@@ -146,12 +147,12 @@ WSGI_APPLICATION = 'Api.wsgi.application'
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
 
-# CORS_ALLOWED_ORIGINS = [
-#     'https://react-chi-peach.vercel.app',  
-#     'https://tashya-mendez.onrender.com',
-#     'http://localhost:3000',  
-#     'http://localhost:5173',
-# ]
+CORS_ALLOWED_ORIGINS = [
+    'https://react-chi-peach.vercel.app',  
+    'https://tashya-mendez.onrender.com',
+    'http://localhost:3000',  
+    'http://localhost:5173',
+]
 
 
 CORS_ALLOW_HEADERS = [

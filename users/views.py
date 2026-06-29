@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
-from .models import Api, HeroImage,  Category, Section,  Product, Favorite, Cart, Order
+from .models import Api, HeroImage,  Category, Section,  Product, Favorite, Cart, Order, CartItem
 from .serializers import HeroImageSerializer,SectionSerializer ,ApiSerializer, ProductSerializer, FavoriteSerializer, CartSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from dj_rest_auth.registration.views import LoginView
@@ -60,6 +60,39 @@ class ToggleFavoriteView(APIView):
         return Response({
             "favorite": True,
             "message": "Added to favorites"
+        })
+    
+
+class AddToCartView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        product_id = request.data.get("product_id")
+        quantity = int(request.data.get("quantity", 1))
+
+        try:
+            product = Product.objects.get(pk=product_id)
+        except Product.DoesNotExist:
+            return Response({"detail": "Product not found"}, status=404)
+
+        cart, created = Cart.objects.get_or_create(
+            user=request.user,
+            is_active=True
+        )
+
+        item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+            defaults={"quantity": quantity}
+        )
+
+        if not created:
+            item.quantity += quantity
+            item.save()
+
+        return Response({
+            "message": "Added to cart",
+            "quantity": item.quantity
         })
 
 class RegisterViewEmail(RegisterView):
