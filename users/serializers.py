@@ -197,7 +197,7 @@ def frontend_url_generator(request, user, temp_key):
 
 
 class CustomPasswordResetSerializer(PasswordResetSerializer):
-    print("🔥 CUSTOM PASSWORD RESET SERIALIZER IS RUNNING")
+  
     def get_email_options(self):
         return {
             "url_generator": frontend_url_generator,

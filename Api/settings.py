@@ -6,7 +6,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -56,7 +55,7 @@ REST_AUTH = {
     'JWT_AUTH_REFRESH_COOKIE': 'my-refresh-token',
     'JWT_AUTH_SAMESITE':"None",
     'JWT_AUTH_SECURE':True,
-    # "PASSWORD_RESET_SERIALIZER": "users.serializers.CustomPasswordResetSerializer",
+    "PASSWORD_RESET_SERIALIZER": "users.serializers.CustomPasswordResetSerializer",
 }
 
 SITE_ID = 1
