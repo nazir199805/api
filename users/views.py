@@ -14,6 +14,7 @@ from django.contrib.auth import get_user_model
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
+from django.core.mail import send_mail
 User = get_user_model()
 
 
@@ -490,3 +491,36 @@ def dashboard_callback(request,context):
                     "table_data":table_data,
                 })
     return context
+
+
+class ContactView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        full_name = request.data.get("full_name")
+        email = request.data.get("email")
+        phone = request.data.get("phone")
+        message = request.data.get("message")
+
+        email_body = f"""
+New Contact Message
+
+Name: {full_name}
+Email: {email}
+Phone: {phone}
+
+Message:
+{message}
+"""
+
+        send_mail(
+            subject=f"Contact Form - {full_name}",
+            message=email_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=["nazirsherzad12345@gmail.com"],
+        )
+
+        return Response(
+            {"detail": "Message sent successfully."},
+            status=status.HTTP_200_OK
+        )

@@ -53,6 +53,7 @@ REST_AUTH = {
     'JWT_AUTH_REFRESH_COOKIE': 'my-refresh-token',
     'JWT_AUTH_SAMESITE':"None",
     'JWT_AUTH_SECURE':True,
+    "PASSWORD_RESET_SERIALIZER": "users.serializers.CustomPasswordResetSerializer",
 }
 
 SITE_ID = 1
@@ -176,9 +177,6 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-REST_AUTH_REGISTER_SERIALIZERS = {
-    'REGISTER_SERIALIZER': 'users.serializers.CustomRegisterSerializer',
-}
 
 
 
@@ -209,17 +207,17 @@ PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"
 
 
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_HOST_USER = 'resetdjango8@gmail.com'
-# EMAIL_HOST_PASSWORD = 'lkbv usgq snba mziv'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# DEFAULT_FROM_EMAIL = 'resetdjango8@gmail.com' 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'resetdjango8@gmail.com'
+EMAIL_HOST_PASSWORD = 'lkbv usgq snba mziv'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'resetdjango8@gmail.com' 
 
-
+FRONTEND_URL = "https://aboutyouwebsite.vercel.app"
 ACCOUNT_LOGIN_METHODS = ["email"]
 
 
@@ -306,14 +304,6 @@ SOCIALACCOUNT_STORE_TOKENS = True
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*', 'first_name', 'last_name'] 
 
 
-# ACCOUNT_SIGNUP_FIELDS = {
-#     'username': {
-#         'required': False,  # Change this based on your preference
-#     },
-#     'email': {
-#         'required': True,  # This means the email is required during signup
-#     }
-# }
 
 
 LANGUAGES = (
@@ -517,5 +507,5 @@ UNFOLD = {
     
 
 
-   
+
 

@@ -182,3 +182,27 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'created_at', 'status', 'total_amount', 'items']
+
+from django.conf import settings
+from dj_rest_auth.serializers import PasswordResetSerializer
+from dj_rest_auth.forms import user_pk_to_url_str
+
+
+def frontend_url_generator(request, user, temp_key):
+    uid = user_pk_to_url_str(user)
+
+    return (
+        f"{settings.FRONTEND_URL}"
+        f"/reset-password/{uid}/{temp_key}/"
+    )
+
+
+from dj_rest_auth.serializers import PasswordResetSerializer
+from .forms import CustomAllAuthPasswordResetForm
+
+
+class CustomPasswordResetSerializer(PasswordResetSerializer):
+
+    @property
+    def password_reset_form_class(self):
+        return CustomAllAuthPasswordResetForm

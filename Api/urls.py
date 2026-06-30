@@ -14,7 +14,7 @@ urlpatterns = [
     
     path('', include('index.urls')),
     path('api/', include('users.urls')),
-    path('accounts/', include('allauth.urls')),
+    # path('accounts/', include('allauth.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('custom/login/', CustomLoginView.as_view(),name='customLogin'),
     path('auth/', include('dj_rest_auth.urls')),
