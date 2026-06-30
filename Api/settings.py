@@ -209,13 +209,26 @@ PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"
 
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'resetdjango8@gmail.com'
-EMAIL_HOST_PASSWORD = 'lkbv usgq snba mziv'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_HOST_USER = 'resetdjango8@gmail.com'
+# EMAIL_HOST_PASSWORD = 'lkbv usgq snba mziv'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# DEFAULT_FROM_EMAIL = 'resetdjango8@gmail.com' 
+
+
+EMAIL_HOST = "smtp-relay.brevo.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'resetdjango8@gmail.com' 
+
+EMAIL_HOST_USER = "b0768e001@smtp-brevo.com"
+EMAIL_HOST_PASSWORD = os.environ.get("BREVO")
+
+DEFAULT_FROM_EMAIL = "A1 Rugs <nazirsherzad12345@gmail.com>"
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+
 
 FRONTEND_URL = "https://aboutyouwebsite.vercel.app"
 ACCOUNT_LOGIN_METHODS = ["email"]
