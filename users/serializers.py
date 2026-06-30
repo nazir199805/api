@@ -48,9 +48,7 @@ class CustomRegisterSerializer(RegisterSerializer):
     last_name = serializers.CharField(max_length=30)
     email = serializers.EmailField(required=True)
 
-    # Profile fields
-    
-    gender = serializers.CharField(required=False, default='male')
+
     
 
     def save(self, request):
@@ -61,7 +59,6 @@ class CustomRegisterSerializer(RegisterSerializer):
 
         # Save profile fields
         profile = user.profile
-        profile.gender = self.validated_data.get('gender', 'male')
         profile.save()
 
         return user
