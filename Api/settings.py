@@ -207,7 +207,7 @@ PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com"
 
 
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_HOST = 'smtp.gmail.com'
@@ -218,16 +218,16 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # DEFAULT_FROM_EMAIL = 'resetdjango8@gmail.com' 
 
 
-# EMAIL_HOST = "smtp-relay.brevo.com"
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
+EMAIL_HOST = "smtp-relay.brevo.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
-# EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")   
-# EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-# BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+EMAIL_HOST_USER = "b0768e001@smtp-brevo.com"   
+EMAIL_HOST_PASSWORD = "xsmtpsib-3cb24ac82270d08c758c22f16882b0e9ec4b305508fd415dd683c9b530701201-p5ioLkonpyKbbOqv"
+BREVO_API_KEY = "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"
 
-# DEFAULT_FROM_EMAIL = "A1 Rugs <nazirsherzad12345@gmail.com>"
-# SERVER_EMAIL = DEFAULT_FROM_EMAIL
+DEFAULT_FROM_EMAIL = "nazirsherzad12345@gmail.com"
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 
 

@@ -524,3 +524,20 @@ Message:
             {"detail": "Message sent successfully."},
             status=status.HTTP_200_OK
         )
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from utils.email import send_email
+
+
+class TestEmailView(APIView):
+    def get(self, request):
+        send_email(
+            to_email="nazirsherzad12345@gmail.com",
+            subject="Render Brevo Test Email",
+            html_content="<h1>It works on Render 🚀</h1>",
+            sender_email="nazirsherzad12345@gmail.com",
+            sender_name="A1 Rugs"
+        )
+        return Response({"message": "Email sent"})

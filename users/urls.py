@@ -21,7 +21,8 @@ urlpatterns = [
     path('token', TokenObtainPairView.as_view()),
     path('token/refresh', TokenRefreshView.as_view()),
     path('products/filter', views.FilterProductView.as_view(), name='filtered_products'),
-    path("contact/", views.ContactView.as_view(), name="contact")
+    path("contact/", views.ContactView.as_view(), name="contact"),
+    path("test-email/", views.TestEmailView.as_view())
     
 ]
 
