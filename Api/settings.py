@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-%sgu-!itv9-q^qtel#c1#9n)u(%d1-i@gsbv$ab_bi@(@up!0f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -222,8 +222,8 @@ EMAIL_HOST = "smtp-relay.brevo.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = "b0768e001@smtp-brevo.com"
-EMAIL_HOST_PASSWORD = os.environ.get("BREVO")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")   
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = "A1 Rugs <nazirsherzad12345@gmail.com>"
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
