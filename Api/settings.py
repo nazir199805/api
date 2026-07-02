@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -57,6 +58,15 @@ REST_AUTH = {
     'JWT_AUTH_SECURE':True,
     "PASSWORD_RESET_SERIALIZER": "users.serializers.CustomPasswordResetSerializer",
 }
+
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_CONFIRM_EMAIL_ON_GET = False
+ACCOUNT_EMAIL_CONFIRMATION_HMAC = True
+
+ACCOUNT_EMAIL_CONFIRMATION_URL = "verify-email/{key}"
+
 
 SITE_ID = 1
 # Application definition
@@ -236,6 +246,7 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 
 FRONTEND_URL = "https://aboutyouwebsite.vercel.app"
+
 ACCOUNT_LOGIN_METHODS = ["email"]
 
 
@@ -253,16 +264,6 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'railway',
-#         'USER': 'postgres',
-#         'PASSWORD': 'cxtPtWuFncJeJsduWqunBhckNxDTzwEP',
-#         'HOST': 'mainline.proxy.rlwy.net',
-#         'PORT': '15098',
-#     }
-# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -322,7 +323,7 @@ SOCIALACCOUNT_STORE_TOKENS = True
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*', 'first_name', 'last_name'] 
 
 
-
+ACCOUNT_ADAPTER = "users.adapter.CustomAccountAdapter"
 
 LANGUAGES = (
     ("de", ("German")),

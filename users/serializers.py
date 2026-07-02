@@ -148,13 +148,39 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='product.name')
-    product_price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2)
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_price = serializers.DecimalField(
+        source='product.price',
+        max_digits=10,
+        decimal_places=2,
+        read_only=True
+    )
+
+    product_image = serializers.SerializerMethodField()
 
     class Meta:
         model = CartItem
-        fields = ['id', 'cart', 'product', 'product_name', 'product_price', 'quantity', 'total_price']
+        fields = [
+            'id',
+            'cart',
+            'product',
+            'product_name',
+            'product_image',
+            'product_price',
+            'quantity',
+            'total_price'
+        ]
 
+    def get_product_image(self, obj):
+        request = self.context.get("request")
+
+        image_obj = obj.product.sub_images.first()  # ✅ correct related_name
+
+        if image_obj and image_obj.image:
+            url = image_obj.image.url
+            return request.build_absolute_uri(url) if request else url
+
+        return None
 
 class CartSerializer(serializers.ModelSerializer):
     user_username = serializers.CharField(source='user.username')

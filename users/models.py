@@ -151,6 +151,7 @@ class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sub_images')
     image = models.ImageField(upload_to='products')
     
+    
 
     def __str__(self):
         return f"Image for {self.product.name}"
@@ -184,7 +185,7 @@ class OrderItem(models.Model):
 
 
     def __str__(self):
-        return f"{self.quantity} x {self.product.name} in Order #{self.order.id}"
+        return f"{self.quantity} x {getattr(self.product, 'name', 'Deleted Product')} in Order #{self.order.id}"
 
     def get_total_price(self):
         return self.price * self.quantity
