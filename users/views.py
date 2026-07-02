@@ -96,6 +96,22 @@ class AddToCartView(APIView):
             "quantity": item.quantity
         })
 
+class RemoveCartItemView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, item_id):
+        try:
+            item = CartItem.objects.get(id=item_id, cart__user=request.user)
+            item.delete()
+
+            return Response({"message": "Item removed from cart"})
+        except CartItem.DoesNotExist:
+            return Response(
+                {"detail": "Item not found"},
+                status=status.HTTP_404_NOT_FOUND)
+
+
+
 class RegisterViewEmail(RegisterView):
     def create(self, request, *args, **kwargs):
         email = request.data.get('email', '').lower().strip()

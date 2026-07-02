@@ -17,6 +17,7 @@ urlpatterns = [
     path("products/search/", views.ProductSearchView.as_view()),
     path("favorites/toggle/", views.ToggleFavoriteView.as_view(), name="toggle_favorite"),
     path("carts/add/",views.AddToCartView.as_view()),
+    path("carts/remove/<int:item_id>/", views.RemoveCartItemView.as_view()),
     path('', include(router.urls)),
     path('token', TokenObtainPairView.as_view()),
     path('token/refresh', TokenRefreshView.as_view()),
