@@ -468,7 +468,6 @@ def create_paypal_order(request):
     return Response(paypal_data)
 
 
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def capture_paypal_order(request):
@@ -495,11 +494,20 @@ def capture_paypal_order(request):
 
     paypal_data = paypal_response.json()
 
-    # ✅ FIND EXISTING ORDER (DO NOT CREATE NEW ONE)
+    # ✅ FIND ORDER
     order = get_object_or_404(Order, paypal_order_id=order_id)
 
+    # 🚨 IMPORTANT: prevent double processing
+    if order.status == "paid":
+        return Response({
+            "message": "Order already processed",
+            "order_id": order.id,
+        })
+
+    # ✅ mark paid
     order.status = "paid"
     order.paypal_capture_id = paypal_data["id"]
+    order.transaction_id = paypal_data["id"]
     order.save()
 
     # ✅ GET CART
@@ -509,16 +517,18 @@ def capture_paypal_order(request):
         is_active=True,
     )
 
-    # Optional: create order items (safe here)
-    for item in cart.items.all():
-        OrderItem.objects.create(
-            order=order,
-            product=item.product,
-            quantity=item.quantity,
-            price=item.product.price,
-        )
+    # 🚨 IMPORTANT: prevent duplicate order items
+    if not order.items.exists():
 
-    # clear cart
+        for item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price,
+            )
+
+    # clear cart safely
     cart.items.all().delete()
     cart.is_active = False
     cart.save()
