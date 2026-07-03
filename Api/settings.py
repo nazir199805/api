@@ -4,7 +4,7 @@ from pathlib import Path
 from datetime import timedelta
 from django.utils.translation import gettext_lazy as _
 
-
+# load_dotenv()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

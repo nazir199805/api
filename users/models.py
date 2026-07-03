@@ -160,16 +160,19 @@ class ProductImage(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = (
+        ('unpaid', 'Unpaid'),
+        ('paid', 'Paid'),
         ('pending', 'Pending'),
         ('processing', 'Processing'),
         ('shipped', 'Shipped'),
         ('delivered', 'Delivered'),
+        ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='unpaid')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):

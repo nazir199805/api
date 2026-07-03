@@ -623,18 +623,18 @@ Message:
         )
 
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from utils.email import send_email
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user).order_by("-created_at")
+    serializer = OrderSerializer(orders, many=True)
+    return Response(serializer.data)
 
 
-class TestEmailView(APIView):
-    def get(self, request):
-        send_email(
-            to_email="nazirsherzad12345@gmail.com",
-            subject="Render Brevo Test Email",
-            html_content="<h1>It works on Render 🚀</h1>",
-            sender_email="nazirsherzad12345@gmail.com",
-            sender_name="A1 Rugs"
-        )
-        return Response({"message": "Email sent"})
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    serializer = OrderSerializer(order)
+    return Response(serializer.data)
+

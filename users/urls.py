@@ -19,12 +19,13 @@ urlpatterns = [
     path("carts/add/",views.AddToCartView.as_view()),
     path("carts/remove/<int:item_id>/", views.RemoveCartItemView.as_view()),
     path('', include(router.urls)),
-    path('token', TokenObtainPairView.as_view()),
+    path('token/', TokenObtainPairView.as_view()),
     path('token/refresh', TokenRefreshView.as_view()),
     path('products/filter', views.FilterProductView.as_view(), name='filtered_products'),
     path("contact/", views.ContactView.as_view(), name="contact"),
-    path("test-email/", views.TestEmailView.as_view())
-    
+    path("orders/", views.my_orders),
+    path("orders/<int:order_id>/", views.order_detail),
+  
 ]
 
 
