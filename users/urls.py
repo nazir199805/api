@@ -25,6 +25,7 @@ urlpatterns = [
     path("contact/", views.ContactView.as_view(), name="contact"),
     path("orders/", views.my_orders),
     path("orders/<int:order_id>/", views.order_detail),
+     path("paypal/webhook/", views.paypal_webhook),
   
 ]
 

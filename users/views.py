@@ -10,11 +10,14 @@ from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 from dj_rest_auth.registration.views import RegisterView
 import requests
+from django.http import JsonResponse
+import json
 from django.contrib.auth import get_user_model
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
 from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_exempt
 User = get_user_model()
 
 
@@ -637,4 +640,32 @@ def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     serializer = OrderSerializer(order)
     return Response(serializer.data)
+@csrf_exempt
+def paypal_webhook(request):
+    data = json.loads(request.body.decode("utf-8"))
 
+    if data.get("event_type") == "PAYMENT.CAPTURE.COMPLETED":
+
+        resource = data.get("resource", {})
+
+        order_id = resource.get("supplementary_data", {}) \
+            .get("related_ids", {}) \
+            .get("order_id")
+
+        capture_id = resource.get("id")
+
+        try:
+            order = Order.objects.get(paypal_order_id=order_id)
+
+            order.status = "paid"
+            order.paypal_capture_id = capture_id
+            order.save()
+
+            print("ORDER PAID:", order.id)
+
+            return JsonResponse({"status": "updated"})
+
+        except Order.DoesNotExist:
+            return JsonResponse({"error": "order not found"}, status=404)
+
+    return JsonResponse({"status": "ignored"})
