@@ -453,11 +453,19 @@ def create_paypal_order(request):
     }
 
     response = requests.post(url, json=data, headers=headers)
-
     response.raise_for_status()
 
-    return Response(response.json())
+    paypal_data = response.json()
 
+    # ✅ CREATE ORDER HERE (IMPORTANT FIX)
+    order = Order.objects.create(
+        user=request.user,
+        total_amount=total,
+        status="pending",
+        paypal_order_id=paypal_data["id"],
+    )
+
+    return Response(paypal_data)
 
 
 
@@ -487,25 +495,21 @@ def capture_paypal_order(request):
 
     paypal_data = paypal_response.json()
 
+    # ✅ FIND EXISTING ORDER (DO NOT CREATE NEW ONE)
+    order = get_object_or_404(Order, paypal_order_id=order_id)
+
+    order.status = "paid"
+    order.paypal_capture_id = paypal_data["id"]
+    order.save()
+
+    # ✅ GET CART
     cart = get_object_or_404(
         Cart,
         user=request.user,
         is_active=True,
     )
 
-    #  calculate total
-    total = Decimal("0.00")
-    for item in cart.items.all():
-        total += item.product.price * item.quantity
-
-    #  CREATE ORDER  
-    order = Order.objects.create(
-        user=request.user,
-        total_amount=total,
-        status="pending",
-    )
-
-    #  CREATE ORDER ITEMS
+    # Optional: create order items (safe here)
     for item in cart.items.all():
         OrderItem.objects.create(
             order=order,
@@ -514,18 +518,16 @@ def capture_paypal_order(request):
             price=item.product.price,
         )
 
-    #  CLEAR CART
+    # clear cart
     cart.items.all().delete()
     cart.is_active = False
     cart.save()
 
-    return Response(
-        {
-            "message": "Payment successful.",
-            "order_id": order.id,
-            "paypal": paypal_data,
-        }
-    )
+    return Response({
+        "message": "Payment successful",
+        "order_id": order.id,
+        "paypal": paypal_data,
+    })
 
 
 
@@ -640,26 +642,39 @@ def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     serializer = OrderSerializer(order)
     return Response(serializer.data)
+
+
 @csrf_exempt
 def paypal_webhook(request):
-    data = json.loads(request.body.decode("utf-8"))
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "invalid json"}, status=400)
 
     if data.get("event_type") == "PAYMENT.CAPTURE.COMPLETED":
 
         resource = data.get("resource", {})
 
-        order_id = resource.get("supplementary_data", {}) \
-            .get("related_ids", {}) \
+        order_id = (
+            resource.get("supplementary_data", {})
+            .get("related_ids", {})
             .get("order_id")
+        )
 
         capture_id = resource.get("id")
+
+        if not order_id:
+            return JsonResponse({"error": "no order id"}, status=400)
 
         try:
             order = Order.objects.get(paypal_order_id=order_id)
 
-            order.status = "paid"
-            order.paypal_capture_id = capture_id
-            order.save()
+            # prevent double updates
+            if order.status != "paid":
+                order.status = "paid"
+                order.paypal_capture_id = capture_id
+                order.save()
 
             print("ORDER PAID:", order.id)
 
