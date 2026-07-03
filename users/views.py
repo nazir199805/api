@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
-from .models import Api, HeroImage,  Category, Section,  Product, Favorite, Cart, Order, CartItem
+from .models import Api, HeroImage,  Category, Section,  Product, Favorite, Cart, Order, CartItem, OrderItem
 from .serializers import HeroImageSerializer,SectionSerializer ,ApiSerializer, ProductSerializer, FavoriteSerializer, CartSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from dj_rest_auth.registration.views import LoginView
@@ -457,20 +457,72 @@ def create_paypal_order(request):
 
 
 
+
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def capture_paypal_order(request):
+
     order_id = request.data.get("orderID")
+
     if not order_id:
-        return Response({"detail": "No orderID provided"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"detail": "No PayPal order id."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     token = get_paypal_access_token()
+
     url = f"{settings.PAYPAL_BASE_URL}/v2/checkout/orders/{order_id}/capture"
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
 
-    res = requests.post(url, headers=headers)
-    res.raise_for_status()
-    return Response(res.json())
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}",
+    }
 
+    paypal_response = requests.post(url, headers=headers)
+    paypal_response.raise_for_status()
+
+    paypal_data = paypal_response.json()
+
+    cart = get_object_or_404(
+        Cart,
+        user=request.user,
+        is_active=True,
+    )
+
+    #  calculate total
+    total = Decimal("0.00")
+    for item in cart.items.all():
+        total += item.product.price * item.quantity
+
+    #  CREATE ORDER  
+    order = Order.objects.create(
+        user=request.user,
+        total_amount=total,
+        status="pending",
+    )
+
+    #  CREATE ORDER ITEMS
+    for item in cart.items.all():
+        OrderItem.objects.create(
+            order=order,
+            product=item.product,
+            quantity=item.quantity,
+            price=item.product.price,
+        )
+
+    #  CLEAR CART
+    cart.items.all().delete()
+    cart.is_active = False
+    cart.save()
+
+    return Response(
+        {
+            "message": "Payment successful.",
+            "order_id": order.id,
+            "paypal": paypal_data,
+        }
+    )
 
 
 
