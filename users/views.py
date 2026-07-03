@@ -405,26 +405,55 @@ from rest_framework.decorators import api_view
 from .paypal_utils import get_paypal_access_token
 
 
+from decimal import Decimal
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import permission_classes
+
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_paypal_order(request):
-    amount = request.data.get("amount", "10.00")  # USD, dynamic
+
+    cart = get_object_or_404(
+        Cart,
+        user=request.user,
+        is_active=True
+    )
+
+    total = Decimal("0.00")
+
+    for item in cart.items.all():
+        total += item.product.price * item.quantity
+
     token = get_paypal_access_token()
 
     url = f"{settings.PAYPAL_BASE_URL}/v2/checkout/orders"
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}",
     }
+
     data = {
         "intent": "CAPTURE",
-        "purchase_units": [{"amount": {"currency_code": "USD", "value": amount}}],
-        "application_context": {"return_url": "http://localhost:3000/", "cancel_url": "http://localhost:3000/"},
+        "purchase_units": [
+            {
+                "amount": {
+                    "currency_code": "USD",
+                    "value": str(total),
+                }
+            }
+        ],
+        "application_context": {
+            "return_url": "https://aboutyouwebsite.vercel.app/payment-success",
+            "cancel_url": "https://aboutyouwebsite.vercel.app/cart",
+        },
     }
 
-    res = requests.post(url, json=data, headers=headers)
-    res.raise_for_status()
-    return Response(res.json())
+    response = requests.post(url, json=data, headers=headers)
 
+    response.raise_for_status()
+
+    return Response(response.json())
 
 
 
