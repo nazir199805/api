@@ -27,11 +27,11 @@ class Brand(models.Model):
 
 class Category(models.Model):
     CATEGORY = (
-    ("Office", "Office"),
-    ("Luxry", "Luxry"),
-    ("Home", "Home"),
-    ("Carpets", "Carpets"),
-    ("Rugs", "Rugs"),
+    ("Oushak", "Oushak"),
+    ("Khotan", "Khotan"),
+    ("Chobi", "Chobi"),
+    ("Kilim", "Kilim"),
+    ("Morrocan", "Morrocan"),
     )
 
     name = models.CharField(max_length=300,choices=CATEGORY)
