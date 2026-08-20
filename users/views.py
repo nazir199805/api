@@ -406,23 +406,16 @@ class UserOrderViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 from .paypal_utils import get_paypal_access_token
-
-from rest_framework.decorators import permission_classes
-
-from decimal import Decimal
-
-import requests
-
-from django.conf import settings
 from django.db import transaction
-from django.shortcuts import get_object_or_404
-
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 from .models import Cart, Order, OrderItem
+from decimal import Decimal
+import requests
+from django.conf import settings
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
 
 
 
@@ -430,9 +423,9 @@ from .models import Cart, Order, OrderItem
 @permission_classes([IsAuthenticated])
 def create_paypal_order(request):
 
-    # ---------------------------------------------------------
+    # =========================================================
     # 1. Get user's active cart
-    # ---------------------------------------------------------
+    # =========================================================
 
     cart = get_object_or_404(
         Cart,
@@ -440,7 +433,10 @@ def create_paypal_order(request):
         is_active=True
     )
 
-    # Make sure cart is not empty
+    # =========================================================
+    # 2. Make sure cart is not empty
+    # =========================================================
+
     if not cart.items.exists():
         return Response(
             {
@@ -449,9 +445,9 @@ def create_paypal_order(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # ---------------------------------------------------------
-    # 2. Calculate total
-    # ---------------------------------------------------------
+    # =========================================================
+    # 3. Calculate cart total
+    # =========================================================
 
     total = Decimal("0.00")
 
@@ -460,9 +456,9 @@ def create_paypal_order(request):
 
     total = total.quantize(Decimal("0.01"))
 
-    # ---------------------------------------------------------
-    # 3. Check if user already has a pending order
-    # ---------------------------------------------------------
+    # =========================================================
+    # 4. Check for existing pending order
+    # =========================================================
 
     existing_order = (
         Order.objects
@@ -475,28 +471,81 @@ def create_paypal_order(request):
         .first()
     )
 
-    # ---------------------------------------------------------
-    # 4. Reuse existing PayPal order
-    # ---------------------------------------------------------
+    # =========================================================
+    # 5. Reuse existing PayPal order
+    # =========================================================
 
-    if existing_order:
+    if existing_order and existing_order.paypal_order_id:
 
-        return Response(
-            {
-                "id": existing_order.paypal_order_id,
-                "local_order_id": existing_order.id,
-                "reused": True,
-            },
-            status=status.HTTP_200_OK,
-        )
+        try:
+            token = get_paypal_access_token()
 
-    # ---------------------------------------------------------
-    # 5. Get PayPal access token
-    # ---------------------------------------------------------
+            paypal_order_url = (
+                f"{settings.PAYPAL_BASE_URL}"
+                f"/v2/checkout/orders/"
+                f"{existing_order.paypal_order_id}"
+            )
+
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}",
+            }
+
+            paypal_response = requests.get(
+                paypal_order_url,
+                headers=headers,
+                timeout=30,
+            )
+
+            paypal_data = paypal_response.json()
+
+            # -------------------------------------------------
+            # PayPal order is still valid
+            # -------------------------------------------------
+
+            if paypal_response.ok:
+
+                paypal_status = paypal_data.get("status")
+
+                if paypal_status == "CREATED":
+
+                    return Response(
+                        {
+                            **paypal_data,
+                            "local_order_id": existing_order.id,
+                            "reused": True,
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+
+                # -------------------------------------------------
+                # If PayPal order is no longer usable, continue
+                # and create a new PayPal order.
+                # -------------------------------------------------
+
+        except requests.RequestException as e:
+
+            print(
+                "Error retrieving existing PayPal order:",
+                str(e)
+            )
+
+        except ValueError:
+
+            print(
+                "PayPal returned invalid JSON for existing order."
+            )
+
+    # =========================================================
+    # 6. Get PayPal access token
+    # =========================================================
 
     try:
+
         token = get_paypal_access_token()
+
     except Exception as e:
+
         return Response(
             {
                 "detail": "Unable to authenticate with PayPal.",
@@ -505,11 +554,14 @@ def create_paypal_order(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-    # ---------------------------------------------------------
-    # 6. Create PayPal order
-    # ---------------------------------------------------------
+    # =========================================================
+    # 7. Create NEW PayPal order
+    # =========================================================
 
-    url = f"{settings.PAYPAL_BASE_URL}/v2/checkout/orders"
+    url = (
+        f"{settings.PAYPAL_BASE_URL}"
+        f"/v2/checkout/orders"
+    )
 
     headers = {
         "Content-Type": "application/json",
@@ -563,9 +615,18 @@ def create_paypal_order(request):
             status=status.HTTP_502_BAD_GATEWAY,
         )
 
-    # ---------------------------------------------------------
-    # 7. Make sure PayPal returned an order ID
-    # ---------------------------------------------------------
+    except ValueError:
+
+        return Response(
+            {
+                "detail": "Invalid response received from PayPal."
+            },
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    # =========================================================
+    # 8. Make sure PayPal returned an order ID
+    # =========================================================
 
     paypal_order_id = paypal_data.get("id")
 
@@ -579,9 +640,9 @@ def create_paypal_order(request):
             status=status.HTTP_502_BAD_GATEWAY,
         )
 
-    # ---------------------------------------------------------
-    # 8. Create local Django order
-    # ---------------------------------------------------------
+    # =========================================================
+    # 9. Create local Django order
+    # =========================================================
 
     order = Order.objects.create(
         user=request.user,
@@ -590,23 +651,20 @@ def create_paypal_order(request):
         paypal_order_id=paypal_order_id,
     )
 
-    # ---------------------------------------------------------
-    # 9. Return PayPal data to frontend
-    # ---------------------------------------------------------
+    # =========================================================
+    # 10. Return PayPal data
+    # =========================================================
 
     return Response(
         {
             **paypal_data,
 
-            # Your local Django order ID
             "local_order_id": order.id,
 
-            # Useful for debugging/frontend
             "reused": False,
         },
         status=status.HTTP_201_CREATED,
     )
-
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
