@@ -609,6 +609,7 @@ def create_paypal_order(request):
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def capture_paypal_order(request):
 
     # ---------------------------------------------------------
