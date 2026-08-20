@@ -426,10 +426,9 @@ from .models import Cart, Order, OrderItem
 
 
 
+
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def create_paypal_order(request):
 
     # ---------------------------------------------------------
