@@ -426,13 +426,12 @@ from .models import Cart, Order, OrderItem
 
 
 
-
 @api_view(["POST"])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def create_paypal_order(request):
 
     # ---------------------------------------------------------
-    # 1. Get active cart
+    # 1. Get user's active cart
     # ---------------------------------------------------------
 
     cart = get_object_or_404(
@@ -441,16 +440,17 @@ def create_paypal_order(request):
         is_active=True
     )
 
+    # Make sure cart is not empty
     if not cart.items.exists():
         return Response(
             {
                 "detail": "Your cart is empty."
             },
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     # ---------------------------------------------------------
-    # 2. Calculate cart total
+    # 2. Calculate total
     # ---------------------------------------------------------
 
     total = Decimal("0.00")
@@ -461,7 +461,7 @@ def create_paypal_order(request):
     total = total.quantize(Decimal("0.01"))
 
     # ---------------------------------------------------------
-    # 3. Find existing pending local order
+    # 3. Check if user already has a pending order
     # ---------------------------------------------------------
 
     existing_order = (
@@ -469,90 +469,52 @@ def create_paypal_order(request):
         .filter(
             user=request.user,
             status="pending",
+            total_amount=total,
         )
         .order_by("-id")
         .first()
     )
 
     # ---------------------------------------------------------
-    # 4. Get PayPal access token
+    # 4. Reuse existing PayPal order
+    # ---------------------------------------------------------
+
+    if existing_order:
+
+        return Response(
+            {
+                "id": existing_order.paypal_order_id,
+                "local_order_id": existing_order.id,
+                "reused": True,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    # ---------------------------------------------------------
+    # 5. Get PayPal access token
     # ---------------------------------------------------------
 
     try:
         token = get_paypal_access_token()
-
     except Exception as e:
-
         return Response(
             {
                 "detail": "Unable to authenticate with PayPal.",
                 "error": str(e),
             },
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+    # ---------------------------------------------------------
+    # 6. Create PayPal order
+    # ---------------------------------------------------------
+
+    url = f"{settings.PAYPAL_BASE_URL}/v2/checkout/orders"
 
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}",
     }
-
-    # ---------------------------------------------------------
-    # 5. Try to reuse existing PayPal order
-    # ---------------------------------------------------------
-
-    if existing_order and existing_order.paypal_order_id:
-
-        check_url = (
-            f"{settings.PAYPAL_BASE_URL}"
-            f"/v2/checkout/orders/"
-            f"{existing_order.paypal_order_id}"
-        )
-
-        try:
-
-            check_response = requests.get(
-                check_url,
-                headers=headers,
-                timeout=30,
-            )
-
-            if check_response.ok:
-
-                paypal_existing = check_response.json()
-
-                paypal_status = paypal_existing.get("status")
-
-                # -------------------------------------------------
-                # PayPal order is still usable
-                # -------------------------------------------------
-
-                if paypal_status == "CREATED":
-
-                    return Response(
-                        {
-                            **paypal_existing,
-
-                            "local_order_id": existing_order.id,
-
-                            "reused": True,
-                        },
-                        status=status.HTTP_200_OK
-                    )
-
-        except requests.RequestException:
-            # If checking the old order fails,
-            # we'll create a new PayPal order below.
-            pass
-
-    # ---------------------------------------------------------
-    # 6. Existing PayPal order isn't usable.
-    # Create a NEW PayPal order.
-    # ---------------------------------------------------------
-
-    url = (
-        f"{settings.PAYPAL_BASE_URL}"
-        f"/v2/checkout/orders"
-    )
 
     data = {
         "intent": "CAPTURE",
@@ -571,7 +533,6 @@ def create_paypal_order(request):
                 "https://aboutyouwebsite.vercel.app/"
                 "payment-success"
             ),
-
             "cancel_url": (
                 "https://aboutyouwebsite.vercel.app/"
                 "cart"
@@ -599,11 +560,11 @@ def create_paypal_order(request):
                 "detail": "Unable to create PayPal order.",
                 "error": str(e),
             },
-            status=status.HTTP_502_BAD_GATEWAY
+            status=status.HTTP_502_BAD_GATEWAY,
         )
 
     # ---------------------------------------------------------
-    # 7. Make sure PayPal returned an ID
+    # 7. Make sure PayPal returned an order ID
     # ---------------------------------------------------------
 
     paypal_order_id = paypal_data.get("id")
@@ -615,59 +576,39 @@ def create_paypal_order(request):
                 "detail": "PayPal did not return an order ID.",
                 "paypal": paypal_data,
             },
-            status=status.HTTP_502_BAD_GATEWAY
+            status=status.HTTP_502_BAD_GATEWAY,
         )
 
     # ---------------------------------------------------------
-    # 8. Reuse existing LOCAL order if possible
+    # 8. Create local Django order
     # ---------------------------------------------------------
 
-    if existing_order:
-
-        existing_order.total_amount = total
-        existing_order.paypal_order_id = paypal_order_id
-        existing_order.status = "pending"
-
-        existing_order.save(
-            update_fields=[
-                "total_amount",
-                "paypal_order_id",
-                "status",
-            ]
-        )
-
-        order = existing_order
+    order = Order.objects.create(
+        user=request.user,
+        total_amount=total,
+        status="pending",
+        paypal_order_id=paypal_order_id,
+    )
 
     # ---------------------------------------------------------
-    # 9. Otherwise create a new LOCAL order
-    # ---------------------------------------------------------
-
-    else:
-
-        order = Order.objects.create(
-            user=request.user,
-            total_amount=total,
-            status="pending",
-            paypal_order_id=paypal_order_id,
-        )
-
-    # ---------------------------------------------------------
-    # 10. Return the COMPLETE PayPal response
+    # 9. Return PayPal data to frontend
     # ---------------------------------------------------------
 
     return Response(
         {
             **paypal_data,
 
+            # Your local Django order ID
             "local_order_id": order.id,
 
+            # Useful for debugging/frontend
             "reused": False,
         },
-        status=status.HTTP_201_CREATED
+        status=status.HTTP_201_CREATED,
     )
 
+
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
 def capture_paypal_order(request):
 
     # ---------------------------------------------------------
