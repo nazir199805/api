@@ -665,53 +665,71 @@ def create_paypal_order(request):
         },
         status=status.HTTP_201_CREATED,
     )
+from decimal import Decimal
+
+import requests
+
+from django.conf import settings
+from django.db import transaction
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def capture_paypal_order(request):
 
-    # ---------------------------------------------------------
-    # 1. Get PayPal order ID from frontend
-    # ---------------------------------------------------------
-
-    order_id = request.data.get("orderID")
-
-    if not order_id:
-
-        return Response(
-            {
-                "detail": "No PayPal order id."
-            },
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    # ---------------------------------------------------------
-    # 2. Get PayPal access token
-    # ---------------------------------------------------------
-
-    try:
-        token = get_paypal_access_token()
-
-    except Exception as e:
-
-        return Response(
-            {
-                "detail": "Unable to authenticate with PayPal.",
-                "error": str(e),
-            },
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-
-    # ---------------------------------------------------------
-    # 3. Lock the local order
-    #
-    # select_for_update() prevents two requests from
-    # processing the same Django order simultaneously.
-    # ---------------------------------------------------------
-
     try:
 
-        with transaction.atomic():
+        # =====================================================
+        # 1. GET PAYPAL ORDER ID
+        # =====================================================
+
+        order_id = request.data.get("orderID")
+
+        if not order_id:
+            return Response(
+                {
+                    "detail": "No PayPal order id."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        print("======================================")
+        print("PAYPAL CAPTURE START")
+        print("PayPal Order ID:", order_id)
+        print("User:", request.user)
+        print("======================================")
+
+        # =====================================================
+        # 2. GET PAYPAL ACCESS TOKEN
+        # =====================================================
+
+        try:
+            token = get_paypal_access_token()
+
+            print("PayPal access token obtained.")
+
+        except Exception as e:
+
+            print("PAYPAL TOKEN ERROR:", repr(e))
+
+            return Response(
+                {
+                    "detail": "Unable to authenticate with PayPal.",
+                    "error": repr(e),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # =====================================================
+        # 3. FIND LOCAL ORDER
+        # =====================================================
+
+        try:
 
             order = (
                 Order.objects
@@ -722,259 +740,412 @@ def capture_paypal_order(request):
                 )
             )
 
-            # -------------------------------------------------
-            # 4. Prevent double processing
-            # -------------------------------------------------
-
-            if order.status == "paid":
-
-                return Response(
-                    {
-                        "message": "Order already processed.",
-                        "order_id": order.id,
-                        "status": "paid",
-                    },
-                    status=status.HTTP_200_OK,
-                )
-
-            # -------------------------------------------------
-            # 5. Make sure order is still pending
-            # -------------------------------------------------
-
-            if order.status != "pending":
-
-                return Response(
-                    {
-                        "detail": (
-                            f"Order cannot be captured because "
-                            f"its current status is "
-                            f"'{order.status}'."
-                        )
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            # -------------------------------------------------
-            # 6. Capture PayPal order
-            # -------------------------------------------------
-
-            url = (
-                f"{settings.PAYPAL_BASE_URL}"
-                f"/v2/checkout/orders/{order_id}/capture"
+            print(
+                "Local Django Order:",
+                order.id
             )
 
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}",
-            }
-
-            try:
-
-                paypal_response = requests.post(
-                    url,
-                    headers=headers,
-                    timeout=30,
-                )
-
-            except requests.RequestException as e:
-
-                return Response(
-                    {
-                        "detail": "Unable to contact PayPal.",
-                        "error": str(e),
-                    },
-                    status=status.HTTP_502_BAD_GATEWAY,
-                )
-
-            # -------------------------------------------------
-            # 7. Parse PayPal response
-            # -------------------------------------------------
-
-            try:
-                paypal_data = paypal_response.json()
-
-            except ValueError:
-
-                return Response(
-                    {
-                        "detail": "Invalid response received from PayPal."
-                    },
-                    status=status.HTTP_502_BAD_GATEWAY,
-                )
-
-            # -------------------------------------------------
-            # 8. Check PayPal HTTP response
-            # -------------------------------------------------
-
-            if not paypal_response.ok:
-
-                return Response(
-                    {
-                        "detail": "PayPal capture failed.",
-                        "paypal": paypal_data,
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            # -------------------------------------------------
-            # 9. IMPORTANT:
-            # Verify PayPal says payment is COMPLETED
-            # -------------------------------------------------
-
-            paypal_status = paypal_data.get("status")
-
-            if paypal_status != "COMPLETED":
-
-                return Response(
-                    {
-                        "detail": "PayPal payment was not completed.",
-                        "paypal_status": paypal_status,
-                        "paypal": paypal_data,
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            # -------------------------------------------------
-            # 10. Get actual PayPal capture ID
-            # -------------------------------------------------
-
-            capture_id = None
-
-            purchase_units = paypal_data.get(
-                "purchase_units",
-                []
+            print(
+                "Local Order Status:",
+                order.status
             )
 
-            if purchase_units:
+        except Order.DoesNotExist:
 
-                payments = (
-                    purchase_units[0]
-                    .get("payments", {})
-                )
-
-                captures = payments.get(
-                    "captures",
-                    []
-                )
-
-                if captures:
-
-                    capture_id = captures[0].get("id")
-
-            # -------------------------------------------------
-            # 11. Fallback
-            # -------------------------------------------------
-
-            if not capture_id:
-
-                capture_id = paypal_data.get("id")
-
-            # -------------------------------------------------
-            # 12. Get user's active cart
-            # -------------------------------------------------
-
-            cart = get_object_or_404(
-                Cart,
-                user=request.user,
-                is_active=True,
+            print(
+                "LOCAL ORDER NOT FOUND"
             )
-
-            # Make sure cart isn't empty
-            if not cart.items.exists():
-
-                return Response(
-                    {
-                        "detail": (
-                            "Payment completed, but the "
-                            "cart is empty."
-                        ),
-                        "order_id": order.id,
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            # -------------------------------------------------
-            # 13. Prevent duplicate OrderItems
-            # -------------------------------------------------
-
-            if not order.items.exists():
-
-                for item in cart.items.all():
-
-                    OrderItem.objects.create(
-                        order=order,
-                        product=item.product,
-                        quantity=item.quantity,
-                        price=item.product.price,
-                    )
-
-            # -------------------------------------------------
-            # 14. Mark order as paid
-            # -------------------------------------------------
-
-            order.status = "paid"
-
-            order.paypal_capture_id = capture_id
-
-            order.transaction_id = capture_id
-
-            order.save(
-                update_fields=[
-                    "status",
-                    "paypal_capture_id",
-                    "transaction_id",
-                ]
-            )
-
-            # -------------------------------------------------
-            # 15. Clear cart
-            # -------------------------------------------------
-
-            cart.items.all().delete()
-
-            cart.is_active = False
-
-            cart.save(
-                update_fields=[
-                    "is_active"
-                ]
-            )
-
-            # -------------------------------------------------
-            # 16. Return success
-            # -------------------------------------------------
 
             return Response(
                 {
-                    "message": "Payment successful.",
+                    "detail": (
+                        "PayPal order was not found "
+                        "for this user."
+                    ),
+                    "paypal_order_id": order_id,
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
+        # =====================================================
+        # 4. ALREADY PAID
+        # =====================================================
+
+        if order.status == "paid":
+
+            print(
+                "ORDER ALREADY PAID"
+            )
+
+            return Response(
+                {
+                    "message": "Order already processed.",
                     "order_id": order.id,
-
-                    "paypal_order_id": order.paypal_order_id,
-
-                    "paypal_capture_id": capture_id,
-
-                    "status": order.status,
-
-                    "paypal": paypal_data,
+                    "status": "paid",
                 },
                 status=status.HTTP_200_OK,
             )
 
-    except Order.DoesNotExist:
+        # =====================================================
+        # 5. CHECK STATUS
+        # =====================================================
+
+        if order.status != "pending":
+
+            return Response(
+                {
+                    "detail": (
+                        f"Order cannot be captured because "
+                        f"its current status is "
+                        f"'{order.status}'."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # =====================================================
+        # 6. CAPTURE PAYPAL PAYMENT
+        # =====================================================
+
+        url = (
+            f"{settings.PAYPAL_BASE_URL}"
+            f"/v2/checkout/orders/"
+            f"{order_id}/capture"
+        )
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+        }
+
+        print(
+            "Calling PayPal capture URL:",
+            url
+        )
+
+        try:
+
+            paypal_response = requests.post(
+                url,
+                headers=headers,
+                timeout=30,
+            )
+
+        except requests.RequestException as e:
+
+            print(
+                "PAYPAL REQUEST ERROR:",
+                repr(e)
+            )
+
+            return Response(
+                {
+                    "detail": "Unable to contact PayPal.",
+                    "error": repr(e),
+                },
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        print(
+            "PayPal HTTP status:",
+            paypal_response.status_code
+        )
+
+        print(
+            "PayPal raw response:",
+            paypal_response.text
+        )
+
+        # =====================================================
+        # 7. PARSE PAYPAL RESPONSE
+        # =====================================================
+
+        try:
+
+            paypal_data = paypal_response.json()
+
+        except ValueError:
+
+            return Response(
+                {
+                    "detail": "PayPal returned invalid JSON.",
+                    "paypal_status_code": (
+                        paypal_response.status_code
+                    ),
+                    "paypal_response": (
+                        paypal_response.text
+                    ),
+                },
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        # =====================================================
+        # 8. PAYPAL ERROR
+        # =====================================================
+
+        if not paypal_response.ok:
+
+            print(
+                "PAYPAL CAPTURE FAILED:",
+                paypal_data
+            )
+
+            return Response(
+                {
+                    "detail": "PayPal capture failed.",
+                    "paypal": paypal_data,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # =====================================================
+        # 9. VERIFY PAYPAL COMPLETED
+        # =====================================================
+
+        paypal_status = paypal_data.get(
+            "status"
+        )
+
+        print(
+            "PayPal order status:",
+            paypal_status
+        )
+
+        if paypal_status != "COMPLETED":
+
+            return Response(
+                {
+                    "detail": (
+                        "PayPal payment was not completed."
+                    ),
+                    "paypal_status": paypal_status,
+                    "paypal": paypal_data,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # =====================================================
+        # 10. GET CAPTURE ID
+        # =====================================================
+
+        capture_id = None
+
+        purchase_units = paypal_data.get(
+            "purchase_units",
+            []
+        )
+
+        if purchase_units:
+
+            payments = (
+                purchase_units[0]
+                .get("payments", {})
+            )
+
+            captures = payments.get(
+                "captures",
+                []
+            )
+
+            if captures:
+
+                capture_id = captures[0].get(
+                    "id"
+                )
+
+        if not capture_id:
+
+            capture_id = paypal_data.get("id")
+
+        print(
+            "PayPal Capture ID:",
+            capture_id
+        )
+
+        # =====================================================
+        # 11. GET ACTIVE CART
+        # =====================================================
+
+        try:
+
+            cart = Cart.objects.get(
+                user=request.user,
+                is_active=True,
+            )
+
+            print(
+                "Active Cart:",
+                cart.id
+            )
+
+        except Cart.DoesNotExist:
+
+            print(
+                "ACTIVE CART NOT FOUND"
+            )
+
+            return Response(
+                {
+                    "detail": (
+                        "Payment was completed by PayPal, "
+                        "but the active cart could not be found."
+                    ),
+                    "order_id": order.id,
+                    "paypal_order_id": order_id,
+                    "paypal_capture_id": capture_id,
+                    "status": "payment_completed_cart_missing",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # =====================================================
+        # 12. CHECK CART
+        # =====================================================
+
+        cart_items = list(
+            cart.items.all()
+        )
+
+        print(
+            "Cart item count:",
+            len(cart_items)
+        )
+
+        if not cart_items:
+
+            return Response(
+                {
+                    "detail": (
+                        "Payment was completed, "
+                        "but the cart is empty."
+                    ),
+                    "order_id": order.id,
+                    "paypal_capture_id": capture_id,
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # =====================================================
+        # 13. CREATE ORDER ITEMS
+        # =====================================================
+
+        print(
+            "Existing OrderItems:",
+            order.items.count()
+        )
+
+        if not order.items.exists():
+
+            for item in cart_items:
+
+                print(
+                    "Creating OrderItem:",
+                    item.product.name,
+                    item.quantity
+                )
+
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    price=item.product.price,
+                )
+
+        # =====================================================
+        # 14. MARK ORDER PAID
+        # =====================================================
+
+        order.status = "paid"
+
+        order.paypal_capture_id = capture_id
+
+        order.transaction_id = capture_id
+
+        order.save(
+            update_fields=[
+                "status",
+                "paypal_capture_id",
+                "transaction_id",
+            ]
+        )
+
+        print(
+            "ORDER MARKED PAID:",
+            order.id
+        )
+
+        # =====================================================
+        # 15. CLEAR CART
+        # =====================================================
+
+        cart.items.all().delete()
+
+        cart.is_active = False
+
+        cart.save(
+            update_fields=[
+                "is_active"
+            ]
+        )
+
+        print(
+            "CART CLEARED"
+        )
+
+        print(
+            "PAYPAL CAPTURE SUCCESS"
+        )
+
+        # =====================================================
+        # 16. SUCCESS
+        # =====================================================
 
         return Response(
             {
-                "detail": (
-                    "PayPal order was not found or "
-                    "does not belong to this user."
-                )
+                "message": "Payment successful.",
+                "order_id": order.id,
+                "paypal_order_id": order.paypal_order_id,
+                "paypal_capture_id": capture_id,
+                "status": "paid",
+                "paypal": paypal_data,
             },
-            status=status.HTTP_404_NOT_FOUND,
+            status=status.HTTP_200_OK,
         )
 
+    # =========================================================
+    # CATCH ANY UNKNOWN ERROR
+    # =========================================================
 
+    except Exception as e:
 
+        import traceback
+
+        print(
+            "======================================"
+        )
+
+        print(
+            "UNEXPECTED PAYPAL CAPTURE ERROR"
+        )
+
+        print(
+            repr(e)
+        )
+
+        traceback.print_exc()
+
+        print(
+            "======================================"
+        )
+
+        return Response(
+            {
+                "detail": "Unexpected server error.",
+                "error": repr(e),
+                "type": type(e).__name__,
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
 from .models import Product, Order, Favorite, User
