@@ -1054,24 +1054,15 @@ def capture_paypal_order(request):
         # =====================================================
         # 14. MARK ORDER PAID
         # =====================================================
-
         order.status = "paid"
 
         order.paypal_capture_id = capture_id
-
-        order.transaction_id = capture_id
 
         order.save(
             update_fields=[
                 "status",
                 "paypal_capture_id",
-                "transaction_id",
             ]
-        )
-
-        print(
-            "ORDER MARKED PAID:",
-            order.id
         )
 
         # =====================================================
