@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Api, HeroImage, HeroButton, Category, Profile, Product, ProductImage
+from .models import Api, HeroImage, HeroButton, Category, Profile, Product, ProductImage, ProductSize
 from unfold.admin import ModelAdmin
 from image_uploader_widget.admin import ImageUploaderInline
 from image_uploader_widget.widgets import ImageUploaderWidget
@@ -51,13 +51,13 @@ class ProductImagesTab(ImageUploaderInline):
 
 
 class ProductAdmin(ModelAdmin):
-    list_display = ('name', 'price','category') 
+    list_display = ('name', 'category') 
     search_fields = ('name', 'category__name')  # Fields to search
     # list_filter = ('category',)  # Add filters in the admin panel
     inlines = [ProductImagesTab]
 
-
-
+class ProductSizeAdmin(ModelAdmin):
+    pass
 
 
 class FavoriteAdmin(ModelAdmin):
@@ -139,3 +139,4 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(HeroButton, ButtonAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderItem, OrderItemAdmin)
+admin.site.register(ProductSize, ProductSizeAdmin)

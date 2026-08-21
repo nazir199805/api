@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Api, HeroImage, HeroButton,Section, Category, Profile, Product, ProductImage
+from .models import Api, HeroImage, HeroButton,Section, Category, Profile, Product, ProductImage, ProductSize
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from taggit.serializers import (TagListSerializerField, TaggitSerializer)
 from dj_rest_auth.serializers import LoginSerializer
@@ -117,26 +117,57 @@ class CategorySerializer(serializers.ModelSerializer):
 #       model = Product
 #       fields = ['id', 'name', 'price', 'color', 'tags', 'is_favorite', 'sub_images', 'category']
 
- 
+class ProductSizeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductSize
+        fields = [
+            'id',
+            'length_cm',
+            'width_cm',
+            'length_ft',
+            'width_ft',
+            'price',
+        ] 
 
 from .models import Product, Favorite, Cart, CartItem
 
 class ProductSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
-    sub_images = ProductImageSerializer(many=True, read_only=True)
+    sub_images = ProductImageSerializer(
+        many=True,
+        read_only=True
+    )
+    sizes = ProductSizeSerializer(
+        many=True,
+        read_only=True
+    )
+
     category = serializers.StringRelatedField()
     tags = TagListSerializerField()
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'price', 'category','brand', 'tags', 'is_favorited','sub_images',]
+        fields = [
+            'id',
+            'name',
+            'category',
+            'brand',
+            'tags',
+            'is_favorited',
+            'sub_images',
+            'sizes',
+        ]
 
     def get_is_favorited(self, obj):
-        user = self.context.get('user')  
-        if user and Favorite.objects.filter(user=user, product=obj).exists():
-            return True
-        return False
+        user = self.context.get('user')
 
+        if user and Favorite.objects.filter(
+            user=user,
+            product=obj
+        ).exists():
+            return True
+
+        return False
 
 class FavoriteSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name')
