@@ -1184,9 +1184,9 @@ def dashboard_callback(request,context):
 
     # Build table data
     table_data = {
-        "headers": ["Name", "Price", "Brand", "Category"],
+        "headers": ["Name", "Brand", "Category"],
         "rows": [
-            [p.name, f"${p.price}", p.brand, p.category]
+            [p.name, p.brand, p.category]
             for p in recent_products
         ]
     }
