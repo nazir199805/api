@@ -187,7 +187,7 @@ class CartItem(models.Model):
         on_delete=models.CASCADE
     )
 
-    # NEW: selected rug size
+    # Selected rug size
     size = models.ForeignKey(
         ProductSize,
         on_delete=models.PROTECT,
@@ -210,10 +210,13 @@ class CartItem(models.Model):
     def __str__(self):
 
         if self.size:
+
             return (
                 f"{self.product.name} "
-                f"({self.size.width} × "
-                f"{self.size.length} {self.size.unit}) "
+                f"({self.size.length_cm} × "
+                f"{self.size.width_cm} cm / "
+                f"{self.size.length_ft} × "
+                f"{self.size.width_ft} ft) "
                 f"in {self.cart.user.username}'s cart"
             )
 
@@ -227,9 +230,7 @@ class CartItem(models.Model):
         if self.size:
             return self.size.price * self.quantity
 
-        return self.product.price * self.quantity
-
-
+        return 0
 # =========================================================
 # FAVORITE
 # =========================================================
